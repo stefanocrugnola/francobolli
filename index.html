@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="it">
 <head>
 <meta charset="UTF-8">
@@ -7,795 +6,493 @@
 <title>Collezione Filatelica — Stefano</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --cream: #f5f0e8;
-    --parchment: #e8dfc8;
-    --ink: #1a1410;
-    --sepia: #6b4c2a;
-    --rust: #9b3a1e;
-    --gold: #c4922a;
-    --faded: #8c7b6a;
-    --stamp-border: #2d1f0e;
-  }
+:root {
+  --cream: #f5f0e8;
+  --parchment: #e8dfc8;
+  --ink: #1a1410;
+  --sepia: #6b4c2a;
+  --rust: #9b3a1e;
+  --gold: #c4922a;
+  --faded: #8c7b6a;
+}
 
-- { margin: 0; padding: 0; box-sizing: border-box; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-background-color: var(–cream);
-color: var(–ink);
-font-family: ‘EB Garamond’, serif;
-font-size: 17px;
-line-height: 1.7;
-min-height: 100vh;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'EB Garamond', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
-/* Texture overlay */
 body::before {
-content: ‘’;
-position: fixed;
-inset: 0;
-background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘300’ height=‘300’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.65’ numOctaves=‘3’ stitchTiles=‘stitch’/%3E%3CfeColorMatrix type=‘saturate’ values=‘0’/%3E%3C/filter%3E%3Crect width=‘300’ height=‘300’ filter=‘url(%23noise)’ opacity=‘0.035’/%3E%3C/svg%3E”);
-pointer-events: none;
-z-index: 1000;
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 999;
 }
 
-/* Header */
+/* ── HEADER ── */
 header {
-background: var(–ink);
-color: var(–cream);
-padding: 3rem 2rem 2.5rem;
-text-align: center;
-position: relative;
-overflow: hidden;
+  background: var(--ink); color: var(--cream);
+  padding: 2.5rem 2rem 2rem; text-align: center;
+  position: relative; overflow: hidden;
 }
-
 header::before {
-content: ‘’;
-position: absolute;
-inset: 0;
-background: repeating-linear-gradient(
-45deg,
-transparent,
-transparent 10px,
-rgba(196,146,42,0.04) 10px,
-rgba(196,146,42,0.04) 20px
-);
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(196,146,42,0.04) 10px, rgba(196,146,42,0.04) 20px);
+}
+.header-ornament { color: var(--gold); font-size: 0.85rem; letter-spacing: 0.4em; text-transform: uppercase; display: block; margin-bottom: 0.6rem; opacity: 0.8; }
+header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 400; position: relative; }
+header h1 em { color: var(--gold); font-style: italic; }
+.header-sub { margin-top: 0.5rem; color: rgba(245,240,232,0.5); font-style: italic; font-size: 0.95rem; }
+.header-rule { width: 100px; height: 1px; background: var(--gold); margin: 1.2rem auto 0; opacity: 0.45; }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  background: var(--parchment);
+  border-bottom: 1px solid rgba(107,76,42,0.18);
+  padding: 0.9rem 1.5rem;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 10px rgba(26,20,16,0.07);
+  display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
 }
 
-.header-ornament {
-color: var(–gold);
-font-size: 1rem;
-letter-spacing: 0.4em;
-text-transform: uppercase;
-display: block;
-margin-bottom: 0.75rem;
-opacity: 0.8;
+.search-wrap {
+  position: relative; flex: 1; min-width: 180px;
 }
-
-header h1 {
-font-family: ‘Playfair Display’, serif;
-font-size: clamp(2.2rem, 5vw, 3.8rem);
-font-weight: 400;
-letter-spacing: 0.02em;
-line-height: 1.15;
-position: relative;
+.search-wrap input {
+  width: 100%;
+  padding: 0.45rem 0.9rem 0.45rem 2.2rem;
+  border: 1px solid rgba(107,76,42,0.3);
+  background: rgba(255,255,255,0.7);
+  font-family: 'EB Garamond', serif; font-size: 0.95rem; color: var(--ink);
+  border-radius: 2px; outline: none;
+  transition: border-color 0.2s;
 }
+.search-wrap input:focus { border-color: var(--sepia); }
+.search-icon { position: absolute; left: 0.65rem; top: 50%; transform: translateY(-50%); color: var(--faded); font-size: 0.9rem; pointer-events: none; }
 
-header h1 em {
-color: var(–gold);
-font-style: italic;
+select, .filter-btn {
+  font-family: 'EB Garamond', serif; font-size: 0.88rem;
+  padding: 0.42rem 0.9rem;
+  border: 1px solid rgba(107,76,42,0.3);
+  background: transparent; color: var(--sepia);
+  cursor: pointer; border-radius: 2px;
+  transition: all 0.18s;
 }
-
-.header-sub {
-margin-top: 0.8rem;
-color: rgba(245,240,232,0.55);
-font-style: italic;
-font-size: 1.05rem;
-letter-spacing: 0.05em;
+select:focus, .filter-btn:hover, .filter-btn.active {
+  background: var(--sepia); color: var(--cream); border-color: var(--sepia);
 }
+select { appearance: none; padding-right: 1.6rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b4c2a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; }
 
-.header-rule {
-width: 120px;
-height: 1px;
-background: var(–gold);
-margin: 1.5rem auto 0;
-opacity: 0.5;
+.toolbar-right { display: flex; gap: 0.5rem; margin-left: auto; align-items: center; }
+.count-badge { font-size: 0.82rem; color: var(--faded); font-style: italic; white-space: nowrap; }
+
+/* ── STATS ── */
+.stats-bar {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 1px; background: rgba(107,76,42,0.12);
+  border-bottom: 1px solid rgba(107,76,42,0.12);
 }
+.stat-cell { background: var(--cream); padding: 1rem 1.2rem; text-align: center; }
+.stat-number { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--rust); display: block; line-height: 1; margin-bottom: 0.2rem; }
+.stat-label { font-size: 0.75rem; color: var(--faded); letter-spacing: 0.07em; text-transform: uppercase; }
 
-/* Navigation / filters */
-.nav-bar {
-background: var(–parchment);
-border-bottom: 1px solid rgba(107,76,42,0.2);
-padding: 0.9rem 2rem;
-display: flex;
-gap: 0.5rem;
-justify-content: center;
-flex-wrap: wrap;
-position: sticky;
-top: 0;
-z-index: 100;
-box-shadow: 0 2px 12px rgba(26,20,16,0.08);
-}
+/* ── MAIN ── */
+main { max-width: 1300px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
 
-.filter-btn {
-background: transparent;
-border: 1px solid rgba(107,76,42,0.35);
-color: var(–sepia);
-font-family: ‘EB Garamond’, serif;
-font-size: 0.9rem;
-padding: 0.35rem 1rem;
-cursor: pointer;
-border-radius: 2px;
-transition: all 0.2s;
-letter-spacing: 0.04em;
-}
-
-.filter-btn:hover, .filter-btn.active {
-background: var(–sepia);
-color: var(–cream);
-border-color: var(–sepia);
-}
-
-/* Main layout */
-main {
-max-width: 1200px;
-margin: 0 auto;
-padding: 3rem 2rem 5rem;
-}
-
-.section-heading {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.5rem;
-font-weight: 400;
-color: var(–sepia);
-margin-bottom: 0.3rem;
-display: flex;
-align-items: center;
-gap: 1rem;
-}
-
-.section-heading::after {
-content: ‘’;
-flex: 1;
-height: 1px;
-background: linear-gradient(to right, rgba(107,76,42,0.3), transparent);
-}
-
-.section-meta {
-font-style: italic;
-color: var(–faded);
-font-size: 0.95rem;
-margin-bottom: 2rem;
-}
-
-/* Stamp Grid */
+/* ── GRID ── */
 .stamp-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-gap: 2.5rem;
-margin-bottom: 4rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2rem; margin-bottom: 3rem;
 }
 
-/* Individual stamp card */
 .stamp-card {
-position: relative;
-cursor: pointer;
-transition: transform 0.3s ease;
-animation: fadeUp 0.5s ease both;
+  cursor: pointer; transition: transform 0.28s ease;
+  animation: fadeUp 0.4s ease both;
 }
+.stamp-card:hover { transform: translateY(-5px); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform:translateY(0); } }
 
-.stamp-card:hover { transform: translateY(-4px); }
-
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(20px); }
-to   { opacity: 1; transform: translateY(0); }
-}
-
-.stamp-card:nth-child(1) { animation-delay: 0.05s; }
-.stamp-card:nth-child(2) { animation-delay: 0.1s; }
-.stamp-card:nth-child(3) { animation-delay: 0.15s; }
-.stamp-card:nth-child(4) { animation-delay: 0.2s; }
-.stamp-card:nth-child(5) { animation-delay: 0.25s; }
-.stamp-card:nth-child(6) { animation-delay: 0.3s; }
-
-/* The perforated stamp frame */
+/* perforated frame */
 .stamp-frame {
-background: white;
-padding: 0.9rem;
-box-shadow: 0 4px 20px rgba(26,20,16,0.15), 0 1px 4px rgba(26,20,16,0.1);
-position: relative;
-margin-bottom: 1rem;
+  background: white; padding: 0.8rem;
+  position: relative; margin-bottom: 0.85rem;
+  box-shadow: 0 3px 16px rgba(26,20,16,0.13), 0 1px 3px rgba(26,20,16,0.08);
+  --p: 6px; --pg: 12px;
 }
-
-/* Perforations via radial-gradient mask */
 .stamp-frame::before {
-content: ‘’;
-position: absolute;
-inset: -1px;
-background:
-radial-gradient(circle at 0% 0%, transparent 5px, white 5px) top left / 14px 14px,
-radial-gradient(circle at 100% 0%, transparent 5px, white 5px) top right / 14px 14px,
-radial-gradient(circle at 0% 100%, transparent 5px, white 5px) bottom left / 14px 14px,
-radial-gradient(circle at 100% 100%, transparent 5px, white 5px) bottom right / 14px 14px;
-background-repeat: no-repeat;
-pointer-events: none;
+  content: ''; position: absolute; left:0; right:0; top: calc(var(--p)/-2); height: var(--p);
+  background: radial-gradient(circle, var(--cream) 45%, transparent 46%) center / var(--pg) var(--p);
+  background-repeat: repeat-x;
 }
+.stamp-frame::after {
+  content: ''; position: absolute; left:0; right:0; bottom: calc(var(--p)/-2); height: var(--p);
+  background: radial-gradient(circle, var(--cream) 45%, transparent 46%) center / var(--pg) var(--p);
+  background-repeat: repeat-x;
+}
+.perf-l, .perf-r {
+  position: absolute; top:0; bottom:0; width: var(--p);
+  background: radial-gradient(circle, var(--cream) 45%, transparent 46%) center / var(--p) var(--pg);
+  background-repeat: repeat-y;
+}
+.perf-l { left: calc(var(--p)/-2); }
+.perf-r { right: calc(var(--p)/-2); }
 
 .stamp-inner {
-border: 1.5px solid rgba(26,20,16,0.12);
-overflow: hidden;
-position: relative;
-aspect-ratio: 3/4;
-display: flex;
-align-items: center;
-justify-content: center;
+  border: 1px solid rgba(26,20,16,0.09);
+  overflow: hidden; position: relative;
+  aspect-ratio: 3/4; background: #ede8dc;
+  display: flex; align-items: center; justify-content: center;
 }
 
-.stamp-image-area {
-width: 100%;
-height: 100%;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 1rem;
-gap: 0.5rem;
-position: relative;
+.stamp-img { width:100%; height:100%; object-fit:cover; display:block; filter:sepia(6%); transition: filter 0.3s; }
+.stamp-card:hover .stamp-img { filter: sepia(0%); }
+
+.stamp-placeholder {
+  width:100%; height:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap: 0.4rem; padding: 0.8rem;
+  background: linear-gradient(145deg, #e8dfc8, #d4c9a0);
 }
+.ph-flag { font-size: 1.8rem; }
+.ph-label { font-family: 'Playfair Display', serif; font-size: 0.65rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color: #2d1f0e; text-align:center; }
+.ph-val { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--rust); font-weight:700; }
 
-/* Decorative vintage stamp designs using CSS */
-.stamp-bg-1 { background: linear-gradient(145deg, #e8dfc8 0%, #d4c9a8 100%); }
-.stamp-bg-2 { background: linear-gradient(145deg, #dce8e0 0%, #b8d4c0 100%); }
-.stamp-bg-3 { background: linear-gradient(145deg, #e8e0dc 0%, #d4b8b0 100%); }
-.stamp-bg-4 { background: linear-gradient(145deg, #e0dce8 0%, #b8b0d4 100%); }
-.stamp-bg-5 { background: linear-gradient(145deg, #e8e4dc 0%, #d4c8a0 100%); }
-.stamp-bg-6 { background: linear-gradient(145deg, #dce0e8 0%, #a8b8c8 100%); }
+.stamp-yr { position:absolute; bottom:5px; right:7px; font-size:0.6rem; color:rgba(26,20,16,0.4); font-style:italic; }
 
-.stamp-icon {
-font-size: 2.8rem;
-line-height: 1;
-filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.2));
+.stamp-title { font-family: 'Playfair Display', serif; font-size:0.9rem; font-weight:400; color:var(--ink); margin-bottom:0.1rem; line-height:1.3; }
+.stamp-sub { font-size:0.8rem; color:var(--faded); font-style:italic; margin-bottom:0.45rem; }
+
+.stamp-tags { display:flex; flex-wrap:wrap; gap:0.3rem; }
+.tag { font-size:0.68rem; padding:0.12rem 0.55rem; border-radius:2px; letter-spacing:0.04em; text-transform:uppercase; }
+.tag-serie  { background:rgba(196,146,42,0.12); color:#7a5a10; }
+.tag-condiz { background:rgba(155,58,30,0.1); color:var(--rust); }
+.tag-anno   { background:rgba(26,20,16,0.07); color:var(--sepia); }
+
+.cond-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:3px; vertical-align:middle; }
+.cond-fds { background:#4a9e6b; }
+.cond-spl { background:#c4922a; }
+.cond-bb  { background:#9b3a1e; }
+
+/* ── EMPTY ── */
+#empty-state { text-align:center; padding:4rem 2rem; color:var(--faded); display:none; }
+#empty-state .ei { font-size:3rem; margin-bottom:1rem; }
+#empty-state p:first-of-type { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--sepia); margin-bottom:0.4rem; }
+#empty-state p { font-style:italic; font-size:0.9rem; }
+
+/* ── PAGINATION ── */
+.pagination { display:flex; justify-content:center; align-items:center; gap:0.4rem; flex-wrap:wrap; margin-top:1rem; }
+.pg-btn {
+  font-family:'EB Garamond',serif; font-size:0.9rem;
+  padding:0.35rem 0.8rem; border:1px solid rgba(107,76,42,0.3);
+  background:transparent; color:var(--sepia); cursor:pointer; border-radius:2px;
+  transition:all 0.15s;
 }
+.pg-btn:hover, .pg-btn.active { background:var(--sepia); color:var(--cream); border-color:var(--sepia); }
+.pg-btn:disabled { opacity:0.3; cursor:default; }
+.pg-info { font-size:0.85rem; color:var(--faded); font-style:italic; padding:0 0.5rem; }
 
-.stamp-country {
-font-family: ‘Playfair Display’, serif;
-font-size: 0.75rem;
-font-weight: 700;
-letter-spacing: 0.18em;
-text-transform: uppercase;
-color: var(–stamp-border);
-text-align: center;
-}
-
-.stamp-value {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.1rem;
-color: var(–rust);
-font-weight: 700;
-}
-
-.stamp-year-tag {
-position: absolute;
-bottom: 6px;
-right: 8px;
-font-size: 0.65rem;
-color: rgba(26,20,16,0.45);
-font-style: italic;
-}
-
-/* Postmark overlay on some cards */
-.postmark {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-30%, -50%) rotate(-18deg);
-width: 70px;
-height: 70px;
-border-radius: 50%;
-border: 2.5px solid rgba(155,58,30,0.35);
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 0.45rem;
-color: rgba(155,58,30,0.35);
-text-align: center;
-letter-spacing: 0.1em;
-text-transform: uppercase;
-font-family: ‘EB Garamond’, serif;
-pointer-events: none;
-}
-
-.postmark::before, .postmark::after {
-content: ‘’;
-position: absolute;
-left: -8px; right: -8px;
-height: 1.5px;
-background: rgba(155,58,30,0.35);
-}
-.postmark::before { top: 50%; }
-.postmark::after  { bottom: calc(50% - 6px); }
-
-/* Card metadata */
-.stamp-title {
-font-family: ‘Playfair Display’, serif;
-font-size: 1rem;
-font-weight: 400;
-color: var(–ink);
-margin-bottom: 0.15rem;
-}
-
-.stamp-subtitle {
-font-size: 0.85rem;
-color: var(–faded);
-font-style: italic;
-margin-bottom: 0.5rem;
-}
-
-.stamp-tags {
-display: flex;
-flex-wrap: wrap;
-gap: 0.35rem;
-}
-
-.tag {
-font-size: 0.72rem;
-padding: 0.15rem 0.6rem;
-border-radius: 2px;
-letter-spacing: 0.05em;
-text-transform: uppercase;
-}
-
-.tag-stato    { background: rgba(26,20,16,0.08);  color: var(–sepia); }
-.tag-condiz   { background: rgba(155,58,30,0.1);  color: var(–rust); }
-.tag-serie    { background: rgba(196,146,42,0.12); color: #7a5a10; }
-
-/* Condition dot */
-.cond-dot {
-display: inline-block;
-width: 7px; height: 7px;
-border-radius: 50%;
-margin-right: 4px;
-vertical-align: middle;
-}
-.cond-fds  { background: #4a9e6b; }
-.cond-spl  { background: #c4922a; }
-.cond-bb   { background: #9b3a1e; }
-
-/* Stats bar */
-.stats-bar {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-gap: 1px;
-background: rgba(107,76,42,0.15);
-border: 1px solid rgba(107,76,42,0.15);
-margin-bottom: 3.5rem;
-border-radius: 3px;
-overflow: hidden;
-}
-
-.stat-cell {
-background: var(–cream);
-padding: 1.2rem 1.5rem;
-text-align: center;
-}
-
-.stat-number {
-font-family: ‘Playfair Display’, serif;
-font-size: 2rem;
-color: var(–rust);
-display: block;
-line-height: 1;
-margin-bottom: 0.25rem;
-}
-
-.stat-label {
-font-size: 0.8rem;
-color: var(–faded);
-letter-spacing: 0.07em;
-text-transform: uppercase;
-}
-
-/* Footer */
-footer {
-background: var(–ink);
-color: rgba(245,240,232,0.4);
-text-align: center;
-padding: 1.5rem;
-font-style: italic;
-font-size: 0.85rem;
-}
-
-footer span { color: var(–gold); opacity: 0.7; }
-
-/* Modal */
+/* ── MODAL ── */
 .modal-backdrop {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(26,20,16,0.75);
-z-index: 500;
-align-items: center;
-justify-content: center;
-padding: 2rem;
-backdrop-filter: blur(3px);
+  display:none; position:fixed; inset:0;
+  background:rgba(26,20,16,0.78); z-index:500;
+  align-items:center; justify-content:center; padding:1.5rem;
+  backdrop-filter:blur(4px);
 }
-
-.modal-backdrop.open { display: flex; }
-
+.modal-backdrop.open { display:flex; }
 .modal {
-background: var(–cream);
-max-width: 520px;
-width: 100%;
-padding: 2.5rem;
-position: relative;
-box-shadow: 0 20px 60px rgba(26,20,16,0.4);
-animation: modalIn 0.25s ease;
+  background:var(--cream); max-width:540px; width:100%;
+  position:relative; box-shadow:0 24px 70px rgba(26,20,16,0.45);
+  animation:mIn 0.22s ease; overflow:hidden; border-radius:1px;
+  max-height: 90vh; display:flex; flex-direction:column;
 }
+@keyframes mIn { from{opacity:0;transform:scale(.95) translateY(10px);} to{opacity:1;transform:scale(1) translateY(0);} }
 
-@keyframes modalIn {
-from { opacity: 0; transform: scale(0.95) translateY(10px); }
-to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+.modal-img-wrap { height:200px; background:#1a1410; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.modal-img-wrap img { width:100%; height:100%; object-fit:contain; }
+.modal-img-ph { font-size:3.5rem; opacity:0.25; }
 
+.modal-body { padding:1.8rem 2rem 2rem; overflow-y:auto; }
 .modal-close {
-position: absolute;
-top: 1rem; right: 1.2rem;
-background: none; border: none;
-font-size: 1.5rem; cursor: pointer;
-color: var(–faded); line-height: 1;
+  position:absolute; top:0.7rem; right:0.8rem;
+  background:rgba(26,20,16,0.55); border:none; color:var(--cream);
+  font-size:1.1rem; cursor:pointer; width:26px; height:26px;
+  border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:10;
 }
+.modal h2 { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:400; margin-bottom:0.2rem; color:var(--ink); }
+.modal-year { color:var(--faded); font-style:italic; margin-bottom:1.2rem; font-size:0.9rem; }
+.modal-row { display:flex; justify-content:space-between; padding:0.45rem 0; border-bottom:1px solid rgba(107,76,42,0.1); font-size:0.92rem; }
+.modal-row:last-child { border-bottom:none; }
+.modal-row-label { color:var(--faded); }
+.modal-row-value { font-weight:500; color:var(--ink); text-align:right; max-width:58%; }
+.modal-note { margin-top:1rem; padding:0.8rem 1rem; background:rgba(107,76,42,0.06); font-style:italic; font-size:0.88rem; color:var(--sepia); border-left:2px solid var(--gold); display:none; }
+.modal-note.has-note { display:block; }
 
-.modal h2 {
-font-family: ‘Playfair Display’, serif;
-font-size: 1.4rem;
-font-weight: 400;
-margin-bottom: 0.3rem;
-color: var(–ink);
-}
+/* ── FOOTER ── */
+footer { background:var(--ink); color:rgba(245,240,232,0.38); text-align:center; padding:1.4rem; font-style:italic; font-size:0.82rem; }
+footer span { color:var(--gold); opacity:0.7; }
 
-.modal-year {
-color: var(–faded);
-font-style: italic;
-margin-bottom: 1.5rem;
-font-size: 0.95rem;
-}
-
-.modal-row {
-display: flex;
-justify-content: space-between;
-padding: 0.5rem 0;
-border-bottom: 1px solid rgba(107,76,42,0.1);
-font-size: 0.95rem;
-}
-
-.modal-row:last-child { border-bottom: none; }
-.modal-row-label { color: var(–faded); }
-.modal-row-value { font-weight: 500; color: var(–ink); }
-
-.modal-note {
-margin-top: 1.2rem;
-padding: 1rem;
-background: rgba(107,76,42,0.06);
-font-style: italic;
-font-size: 0.9rem;
-color: var(–sepia);
-border-left: 2px solid var(–gold);
+@media(max-width:600px) {
+  .toolbar { flex-direction:column; }
+  .toolbar-right { margin-left:0; width:100%; justify-content:space-between; }
+  .stamp-grid { grid-template-columns: repeat(auto-fill, minmax(155px,1fr)); gap:1.3rem; }
 }
 </style>
-
 </head>
 <body>
 
 <header>
   <span class="header-ornament">✦ Collezione Privata ✦</span>
   <h1>Filatelia <em>Italiana</em></h1>
-  <p class="header-sub">Regno d'Italia &amp; Prima Repubblica — dal 1862</p>
+  <p class="header-sub">Repubblica Italiana · 1996 – 2025</p>
   <div class="header-rule"></div>
 </header>
 
-<nav class="nav-bar">
-  <button class="filter-btn active" onclick="filterStamps('tutti', this)">Tutti</button>
-  <button class="filter-btn" onclick="filterStamps('regno', this)">Regno d'Italia</button>
-  <button class="filter-btn" onclick="filterStamps('repubblica', this)">Repubblica</button>
-  <button class="filter-btn" onclick="filterStamps('fds', this)">Solo FDS</button>
-</nav>
+<div class="stats-bar">
+  <div class="stat-cell"><span class="stat-number" id="s-tot">—</span><span class="stat-label">Esemplari</span></div>
+  <div class="stat-cell"><span class="stat-number" id="s-fds">—</span><span class="stat-label">FDS / SPL</span></div>
+  <div class="stat-cell"><span class="stat-number" id="s-serie">—</span><span class="stat-label">Serie</span></div>
+  <div class="stat-cell"><span class="stat-number" id="s-anni">—</span><span class="stat-label">Anni coperti</span></div>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Cerca francobollo, serie, Sassone…" oninput="applyFilters()">
+  </div>
+  <select id="fil-serie" onchange="applyFilters()">
+    <option value="">Tutte le serie</option>
+  </select>
+  <select id="fil-anno" onchange="applyFilters()">
+    <option value="">Tutti gli anni</option>
+  </select>
+  <select id="fil-cond" onchange="applyFilters()">
+    <option value="">Condizione</option>
+    <option value="fds">FDS</option>
+    <option value="spl">SPL</option>
+    <option value="bb">BB</option>
+  </select>
+  <select id="fil-sort" onchange="applyFilters()">
+    <option value="anno-asc">Anno ↑</option>
+    <option value="anno-desc">Anno ↓</option>
+    <option value="titolo">Titolo A-Z</option>
+    <option value="serie">Serie A-Z</option>
+  </select>
+  <div class="toolbar-right">
+    <span class="count-badge" id="count-badge"></span>
+  </div>
+</div>
 
 <main>
-  <!-- Stats -->
-  <div class="stats-bar">
-    <div class="stat-cell">
-      <span class="stat-number">47</span>
-      <span class="stat-label">Esemplari</span>
-    </div>
-    <div class="stat-cell">
-      <span class="stat-number">12</span>
-      <span class="stat-label">Serie complete</span>
-    </div>
-    <div class="stat-cell">
-      <span class="stat-number">1862</span>
-      <span class="stat-label">Anno più antico</span>
-    </div>
-    <div class="stat-cell">
-      <span class="stat-number">18</span>
-      <span class="stat-label">FDS / SPL</span>
-    </div>
+  <div class="stamp-grid" id="grid"></div>
+  <div id="empty-state">
+    <div class="ei">📭</div>
+    <p>Nessun risultato</p>
+    <p>Prova a modificare i filtri di ricerca.</p>
   </div>
-
-  <!-- Section -->
-
-  <h2 class="section-heading">Regno d'Italia</h2>
-  <p class="section-meta">Emissioni 1862 – 1943 · Collezione in aggiornamento</p>
-
-  <div class="stamp-grid" id="stamp-grid">
-
-```
-<!-- Stamp 1 -->
-<div class="stamp-card" data-categoria="regno" data-condizione="fds" onclick="openModal(0)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-1">
-        <div class="stamp-icon">👑</div>
-        <div class="stamp-country">Regno d'Italia</div>
-        <div class="stamp-value">15 c.</div>
-        <span class="stamp-year-tag">1863</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Effigie Vittorio Emanuele II</div>
-  <div class="stamp-subtitle">Prima emissione del Regno</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Regno</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-fds"></span>FDS</span>
-    <span class="tag tag-serie">Effigie II</span>
-  </div>
-</div>
-
-<!-- Stamp 2 -->
-<div class="stamp-card" data-categoria="regno" data-condizione="spl" onclick="openModal(1)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-2">
-        <div class="postmark">Roma<br>1900</div>
-        <div class="stamp-icon">🦅</div>
-        <div class="stamp-country">Italia</div>
-        <div class="stamp-value">25 c.</div>
-        <span class="stamp-year-tag">1901</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Aquila Sabauda</div>
-  <div class="stamp-subtitle">Emissione floreale 1901</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Regno</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-spl"></span>SPL</span>
-    <span class="tag tag-serie">Floreale</span>
-  </div>
-</div>
-
-<!-- Stamp 3 -->
-<div class="stamp-card" data-categoria="regno" data-condizione="fds" onclick="openModal(2)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-3">
-        <div class="stamp-icon">⚔️</div>
-        <div class="stamp-country">Italia</div>
-        <div class="stamp-value">10 c.</div>
-        <span class="stamp-year-tag">1916</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Pro Croce Rossa</div>
-  <div class="stamp-subtitle">Emissione di guerra 1915–16</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Regno</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-fds"></span>FDS</span>
-    <span class="tag tag-serie">Beneficenza</span>
-  </div>
-</div>
-
-<!-- Stamp 4 -->
-<div class="stamp-card" data-categoria="regno" data-condizione="bb" onclick="openModal(3)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-4">
-        <div class="postmark">Milano<br>1935</div>
-        <div class="stamp-icon">🏛️</div>
-        <div class="stamp-country">Italia</div>
-        <div class="stamp-value">50 c.</div>
-        <span class="stamp-year-tag">1932</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Dante Alighieri</div>
-  <div class="stamp-subtitle">VI centenario della morte</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Regno</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-bb"></span>BB</span>
-    <span class="tag tag-serie">Commemorativa</span>
-  </div>
-</div>
-
-<!-- Stamp 5 -->
-<div class="stamp-card" data-categoria="repubblica" data-condizione="fds" onclick="openModal(4)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-5">
-        <div class="stamp-icon">🌿</div>
-        <div class="stamp-country">Repubblica Italiana</div>
-        <div class="stamp-value">L. 10</div>
-        <span class="stamp-year-tag">1948</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Democratica — Fiaccola</div>
-  <div class="stamp-subtitle">Prima serie repubblicana</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Repubblica</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-fds"></span>FDS</span>
-    <span class="tag tag-serie">Democratica</span>
-  </div>
-</div>
-
-<!-- Stamp 6 -->
-<div class="stamp-card" data-categoria="repubblica" data-condizione="spl" onclick="openModal(5)">
-  <div class="stamp-frame">
-    <div class="stamp-inner">
-      <div class="stamp-image-area stamp-bg-6">
-        <div class="stamp-icon">🎨</div>
-        <div class="stamp-country">Italia</div>
-        <div class="stamp-value">L. 60</div>
-        <span class="stamp-year-tag">1961</span>
-      </div>
-    </div>
-  </div>
-  <div class="stamp-title">Centenario dell'Unità d'Italia</div>
-  <div class="stamp-subtitle">Emissione celebrativa 1961</div>
-  <div class="stamp-tags">
-    <span class="tag tag-stato">Repubblica</span>
-    <span class="tag tag-condiz"><span class="cond-dot cond-spl"></span>SPL</span>
-    <span class="tag tag-serie">Risorgimento</span>
-  </div>
-</div>
-```
-
-  </div>
+  <div class="pagination" id="pagination"></div>
 </main>
 
-<!-- Modal detail -->
-
-<div class="modal-backdrop" id="modal" onclick="closeModalOutside(event)">
+<div class="modal-backdrop" id="modal" onclick="closeOut(event)">
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">×</button>
-    <h2 id="modal-title"></h2>
-    <p class="modal-year" id="modal-year"></p>
-    <div id="modal-rows"></div>
-    <div class="modal-note" id="modal-note"></div>
+    <div class="modal-img-wrap" id="m-img"></div>
+    <div class="modal-body">
+      <h2 id="m-title"></h2>
+      <p class="modal-year" id="m-year"></p>
+      <div id="m-rows"></div>
+      <div class="modal-note" id="m-note"></div>
+    </div>
   </div>
 </div>
 
-<footer>
-  Collezione di <span>Stefano</span> &mdash; aggiornata a marzo 2026
-</footer>
+<footer>Collezione di <span>Stefano</span> &mdash; aggiornata a marzo 2026</footer>
 
 <script>
-const stamps = [
-  {
-    title: "Effigie Vittorio Emanuele II",
-    year: "1863 · 15 centesimi",
-    rows: [
-      ["Serie", "Effigie II"],
-      ["Dentellatura", "15 L"],
-      ["Carta", "Bianca, patinata"],
-      ["Colore", "Arancio"],
-      ["Condizione", "FDS — Fiore di Stampa"],
-      ["Tiratura", "c.a. 2.800.000"],
-      ["Sassone n°", "Sa. L17"],
-    ],
-    note: "Uno dei pezzi di punta della collezione. Acquistato in asta nel 2021, con certificato Sorani."
-  },
-  {
-    title: "Aquila Sabauda",
-    year: "1901 · 25 centesimi",
-    rows: [
-      ["Serie", "Floreale 1901"],
-      ["Dentellatura", "14"],
-      ["Carta", "Vergata"],
-      ["Colore", "Azzurro"],
-      ["Condizione", "SPL — Splendido"],
-      ["Tiratura", "c.a. 5.200.000"],
-      ["Sassone n°", "Sa. 72"],
-    ],
-    note: "Annullato con timbro \"Roma 1900\" di nitida impressione. Caratteristica colorazione intensa."
-  },
-  {
-    title: "Pro Croce Rossa",
-    year: "1916 · 10+5 centesimi",
-    rows: [
-      ["Serie", "Beneficenza di guerra"],
-      ["Dentellatura", "14×13½"],
-      ["Carta", "Bianca"],
-      ["Colore", "Rosa"],
-      ["Condizione", "FDS — Fiore di Stampa"],
-      ["Tiratura", "c.a. 800.000"],
-      ["Sassone n°", "Sa. 102"],
-    ],
-    note: "Rarità relativa per via della bassa tiratura bellica. Gomma integra originale."
-  },
-  {
-    title: "Dante Alighieri",
-    year: "1932 · 50 centesimi",
-    rows: [
-      ["Serie", "Commemorativa"],
-      ["Dentellatura", "14"],
-      ["Carta", "Patinata"],
-      ["Colore", "Violetto"],
-      ["Condizione", "BB — Bello"],
-      ["Tiratura", "c.a. 1.900.000"],
-      ["Sassone n°", "Sa. 313"],
-    ],
-    note: "Annullato con timbro ufficio postale di Milano, 1935. Centering leggermente spostato a sinistra."
-  },
-  {
-    title: "Democratica — Fiaccola",
-    year: "1948 · 10 Lire",
-    rows: [
-      ["Serie", "Democratica"],
-      ["Dentellatura", "14"],
-      ["Carta", "Bianca"],
-      ["Colore", "Arancio vivo"],
-      ["Condizione", "FDS — Fiore di Stampa"],
-      ["Tiratura", "c.a. 12.000.000"],
-      ["Sassone n°", "Sa. 553"],
-    ],
-    note: "Prima serie della Repubblica Italiana. Stato di conservazione eccellente con gomma originale brillante."
-  },
-  {
-    title: "Centenario Unità d'Italia",
-    year: "1961 · 60 Lire",
-    rows: [
-      ["Serie", "Risorgimento 1961"],
-      ["Dentellatura", "14"],
-      ["Carta", "Fluorescente"],
-      ["Colore", "Grigio-verde"],
-      ["Condizione", "SPL — Splendido"],
-      ["Tiratura", "c.a. 6.500.000"],
-      ["Sassone n°", "Sa. 898"],
-    ],
-    note: "Emessa per il centenario dell'Unità d'Italia. Colore particolarmente brillante, raro in questa conservazione."
-  }
-];
+const PER_PAGE = 48;
+let allStamps = [];
+let filtered = [];
+let page = 1;
 
-function openModal(i) {
-  const s = stamps[i];
-  document.getElementById('modal-title').textContent = s.title;
-  document.getElementById('modal-year').textContent = s.year;
-  document.getElementById('modal-note').textContent = s.note;
-  const rows = s.rows.map(r =>
-    `<div class="modal-row"><span class="modal-row-label">${r[0]}</span><span class="modal-row-value">${r[1]}</span></div>`
+// ── Load stamps.json ──
+async function init() {
+  try {
+    const res = await fetch('stamps.json');
+    allStamps = await res.json();
+  } catch(e) {
+    // fallback for local testing
+    allStamps = [];
+  }
+  buildSelects();
+  buildStats();
+  applyFilters();
+}
+
+function buildSelects() {
+  const series = [...new Set(allStamps.map(s => s.serie).filter(Boolean))].sort();
+  const anni   = [...new Set(allStamps.map(s => s.anno).filter(Boolean))].sort((a,b)=>a-b);
+  const selSerie = document.getElementById('fil-serie');
+  const selAnno  = document.getElementById('fil-anno');
+  series.forEach(s => { const o = document.createElement('option'); o.value=s; o.textContent=s; selSerie.appendChild(o); });
+  anni.forEach(a   => { const o = document.createElement('option'); o.value=a; o.textContent=a; selAnno.appendChild(o); });
+}
+
+function buildStats() {
+  document.getElementById('s-tot').textContent   = allStamps.length;
+  document.getElementById('s-fds').textContent   = allStamps.filter(s=>s.condizione==='fds'||s.condizione==='spl').length;
+  document.getElementById('s-serie').textContent = [...new Set(allStamps.map(s=>s.serie).filter(Boolean))].length;
+  const anni = allStamps.map(s=>s.anno).filter(Boolean);
+  document.getElementById('s-anni').textContent  = anni.length ? `${Math.min(...anni)}–${Math.max(...anni)}` : '—';
+}
+
+function applyFilters() {
+  const q     = document.getElementById('search').value.toLowerCase().trim();
+  const serie = document.getElementById('fil-serie').value;
+  const anno  = document.getElementById('fil-anno').value;
+  const cond  = document.getElementById('fil-cond').value;
+  const sort  = document.getElementById('fil-sort').value;
+
+  filtered = allStamps.filter(s => {
+    if (serie && s.serie !== serie) return false;
+    if (anno  && s.anno  != anno)  return false;
+    if (cond  && s.condizione !== cond) return false;
+    if (q) {
+      const hay = `${s.title} ${s.subtitle} ${s.serie} ${s.sassone} ${s.anno} ${s.note}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (sort === 'anno-asc')  filtered.sort((a,b) => (a.anno||0) - (b.anno||0));
+  if (sort === 'anno-desc') filtered.sort((a,b) => (b.anno||0) - (a.anno||0));
+  if (sort === 'titolo')    filtered.sort((a,b) => a.title.localeCompare(b.title, 'it'));
+  if (sort === 'serie')     filtered.sort((a,b) => (a.serie||'').localeCompare(b.serie||'', 'it'));
+
+  page = 1;
+  document.getElementById('count-badge').textContent = filtered.length === allStamps.length
+    ? `${allStamps.length} esemplari`
+    : `${filtered.length} di ${allStamps.length}`;
+  render();
+}
+
+function render() {
+  const grid  = document.getElementById('grid');
+  const empty = document.getElementById('empty-state');
+  grid.innerHTML = '';
+
+  if (filtered.length === 0) { empty.style.display='block'; document.getElementById('pagination').innerHTML=''; return; }
+  empty.style.display = 'none';
+
+  const start = (page-1)*PER_PAGE;
+  const slice = filtered.slice(start, start+PER_PAGE);
+  const globalIdx = {};
+  allStamps.forEach((s,i) => globalIdx[s.id] = i);
+
+  slice.forEach((s, i) => {
+    const gi = allStamps.indexOf(s);
+    const cLabel = {fds:'FDS', spl:'SPL', bb:'BB'}[s.condizione] || s.condizione?.toUpperCase();
+    const imgContent = s.immagine
+      ? `<img class="stamp-img" src="${s.immagine}" alt="${s.title}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${s.valore||''}</div></div>'">`
+      : `<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${s.valore||''}</div></div>`;
+
+    const card = document.createElement('div');
+    card.className = 'stamp-card';
+    card.style.animationDelay = `${Math.min(i*0.04, 0.5)}s`;
+    card.onclick = () => openModal(gi);
+    card.innerHTML = `
+      <div class="stamp-frame">
+        <div class="perf-l"></div><div class="perf-r"></div>
+        <div class="stamp-inner">
+          ${imgContent}
+          <span class="stamp-yr">${s.anno||''}</span>
+        </div>
+      </div>
+      <div class="stamp-title">${s.title}</div>
+      <div class="stamp-sub">${s.subtitle||''}</div>
+      <div class="stamp-tags">
+        ${s.serie ? `<span class="tag tag-serie">${s.serie}</span>` : ''}
+        ${cLabel ? `<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cLabel}</span>` : ''}
+        ${s.anno ? `<span class="tag tag-anno">${s.anno}</span>` : ''}
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  buildPagination();
+}
+
+function buildPagination() {
+  const pg = document.getElementById('pagination');
+  pg.innerHTML = '';
+  const total = Math.ceil(filtered.length / PER_PAGE);
+  if (total <= 1) return;
+
+  const prev = document.createElement('button');
+  prev.className='pg-btn'; prev.textContent='← Prec';
+  prev.disabled = page === 1;
+  prev.onclick = () => { page--; render(); window.scrollTo(0,0); };
+  pg.appendChild(prev);
+
+  // page numbers (max 7 visible)
+  const range = [];
+  for (let p=1; p<=total; p++) {
+    if (p===1||p===total||Math.abs(p-page)<=2) range.push(p);
+    else if (range[range.length-1]!=='…') range.push('…');
+  }
+  range.forEach(p => {
+    if (p==='…') { const s=document.createElement('span'); s.className='pg-info'; s.textContent='…'; pg.appendChild(s); return; }
+    const btn=document.createElement('button'); btn.className='pg-btn'+(p===page?' active':''); btn.textContent=p;
+    btn.onclick=()=>{ page=p; render(); window.scrollTo(0,0); }; pg.appendChild(btn);
+  });
+
+  const next = document.createElement('button');
+  next.className='pg-btn'; next.textContent='Succ →';
+  next.disabled = page === total;
+  next.onclick = () => { page++; render(); window.scrollTo(0,0); };
+  pg.appendChild(next);
+
+  const info = document.createElement('span');
+  info.className='pg-info';
+  const start=(page-1)*PER_PAGE+1, end=Math.min(page*PER_PAGE, filtered.length);
+  info.textContent=`${start}–${end} di ${filtered.length}`;
+  pg.appendChild(info);
+}
+
+function openModal(idx) {
+  const s = allStamps[idx];
+  document.getElementById('m-title').textContent = s.title;
+  document.getElementById('m-year').textContent  = `${s.anno||''} · ${s.valore||''}`;
+
+  const imgWrap = document.getElementById('m-img');
+  imgWrap.innerHTML = s.immagine
+    ? `<img src="${s.immagine}" alt="${s.title}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🇮🇹</div>'">`
+    : `<div class="modal-img-ph">🇮🇹</div>`;
+
+  const fields = [
+    ['Serie', s.serie], ['Sassone', s.sassone], ['Dentellatura', s.dentellatura],
+    ['Carta', s.carta], ['Colore', s.colore], ['Condizione', ({fds:'FDS — Fiore di Stampa', spl:'SPL — Splendido', bb:'BB — Bello'}[s.condizione]||s.condizione)]
+  ];
+  document.getElementById('m-rows').innerHTML = fields.filter(([,v])=>v).map(([l,v])=>
+    `<div class="modal-row"><span class="modal-row-label">${l}</span><span class="modal-row-value">${v}</span></div>`
   ).join('');
-  document.getElementById('modal-rows').innerHTML = rows;
+
+  const noteEl = document.getElementById('m-note');
+  noteEl.textContent = s.note||'';
+  noteEl.className = 'modal-note' + (s.note ? ' has-note' : '');
+
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeOut(e)  { if (e.target.id==='modal') closeModal(); }
 
-function closeModalOutside(e) {
-  if (e.target.id === 'modal') closeModal();
-}
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-function filterStamps(cat, btn) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.stamp-card').forEach(card => {
-    const show = cat === 'tutti'
-      || card.dataset.categoria === cat
-      || (cat === 'fds' && card.dataset.condizione === 'fds');
-    card.style.display = show ? '' : 'none';
-  });
-}
+init();
 </script>
-
 </body>
 </html>
