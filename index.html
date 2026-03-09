@@ -223,9 +223,9 @@ footer span{color:var(--gold);opacity:.7;}
 </main>
 
 <!-- Detail modal -->
-<div class="modal-backdrop" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" onclick="if(event.target.id==='modal')closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close" onclick="closeModal()" aria-label="Chiudi">×</button>
     <div class="modal-img-wrap" id="m-img"></div>
     <div class="modal-body">
       <h2 id="m-title"></h2>
@@ -238,13 +238,13 @@ footer span{color:var(--gold);opacity:.7;}
 </div>
 
 <!-- Password overlay -->
-<div class="pwd-overlay" id="pwd-overlay" style="display:none;">
+<div class="pwd-overlay" id="pwd-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Autenticazione pannello admin">
   <div class="pwd-box">
     <h3>🔐 Pannello Admin</h3>
     <p>Inserisci la password per accedere</p>
-    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()">
+    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()" aria-label="Password admin">
     <button class="pwd-btn" onclick="checkPwd()">Accedi</button>
-    <div class="pwd-error" id="pwd-error" style="display:none;">Password errata. Riprova.</div>
+    <div class="pwd-error" id="pwd-error" style="display:none;" role="alert">Password errata. Riprova.</div>
   </div>
 </div>
 
@@ -270,7 +270,8 @@ footer span{color:var(--gold);opacity:.7;}
 const GITHUB_USER = 'stefanocrugnola';
 const GITHUB_REPO = 'francobolli';
 const GITHUB_FILE = 'stamps.json';
-const ADMIN_PWD   = 'ciaociao';
+// SHA-256 della password 'ciaociao' — la password in chiaro non è mai nel sorgente
+const ADMIN_PWD_HASH = '9331a1d273d1c186ac996050b184dd0c616d495c4b6ff7bc9ba016c21cd331ea';
 const PER_PAGE    = 48;
 
 let allStamps = [], filtered = [], page = 1;
@@ -313,7 +314,7 @@ function applyFilters() {
 
   filtered=allStamps.filter(s=>{
     if(ser&&s.serie!==ser) return false;
-    if(ann&&s.anno!=ann) return false;
+    if(ann&&s.anno!==Number(ann)) return false;
     if(cond&&s.condizione!==cond) return false;
     if(q&&!`${s.title} ${s.subtitle} ${s.serie} ${s.sassone} ${s.anno} ${s.note}`.toLowerCase().includes(q)) return false;
     return true;
@@ -368,10 +369,10 @@ function buildPagination() {
   };
   pg.appendChild(mkBtn('← Prec',page-1,page===1,false));
   const range=[];
-  for(let p=1;p<=total;p++){if(p===1||p===total||Math.abs(p-page)<=2)range.push(p);else if(range[range.length-1]!=='…')range.push('…');}
-  range.forEach(p=>{
-    if(p==='…'){const s=document.createElement('span');s.className='pg-info';s.textContent='…';pg.appendChild(s);return;}
-    pg.appendChild(mkBtn(p,p,false,p===page));
+  for(let pn=1;pn<=total;pn++){if(pn===1||pn===total||Math.abs(pn-page)<=2)range.push(pn);else if(range[range.length-1]!=='…')range.push('…');}
+  range.forEach(pn=>{
+    if(pn==='…'){const s=document.createElement('span');s.className='pg-info';s.textContent='…';pg.appendChild(s);return;}
+    pg.appendChild(mkBtn(pn,pn,false,pn===page));
   });
   pg.appendChild(mkBtn('Succ →',page+1,page===total,false));
   const info=document.createElement('span');info.className='pg-info';
@@ -380,7 +381,19 @@ function buildPagination() {
 }
 
 // ── DETAIL MODAL ──────────────────────────────────────────────
+function editFromModal(){closeModal();openAdmin();switchTabByName('form');setTimeout(()=>loadForm(allStamps[currentModalIdx]),80);}
+
+let _lastFocusedEl=null;
+function trapFocus(el,e){
+  const focusable=Array.from(el.querySelectorAll('button,input,select,textarea,[href],[tabindex]:not([tabindex="-1"])')).filter(n=>!n.disabled&&n.offsetParent!==null);
+  if(!focusable.length)return;
+  const first=focusable[0], last=focusable[focusable.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+
 function openModal(idx) {
+  _lastFocusedEl=document.activeElement;
   currentModalIdx=idx; const s=allStamps[idx];
   document.getElementById('m-title').textContent=s.title;
   document.getElementById('m-year').textContent=`${s.anno||''} · ${s.valore||''}`;
@@ -393,17 +406,25 @@ function openModal(idx) {
   const ne=document.getElementById('m-note');
   ne.textContent=s.note||''; ne.style.display=s.note?'block':'none';
   document.getElementById('m-edit-btn').style.display=adminUnlocked?'block':'none';
-  document.getElementById('modal').classList.add('open');
+  const modalEl=document.getElementById('modal');
+  modalEl.classList.add('open');
+  setTimeout(()=>modalEl.querySelector('.modal-close')?.focus(),50);
 }
 
-function editFromModal(){closeModal();openAdmin();switchTabByName('form');setTimeout(()=>loadForm(allStamps[currentModalIdx]),80);}
-function closeModal(){document.getElementById('modal').classList.remove('open');}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  if(_lastFocusedEl){_lastFocusedEl.focus();_lastFocusedEl=null;}
+}
+
+document.getElementById('modal').addEventListener('keydown',e=>{if(e.key==='Tab')trapFocus(document.getElementById('modal'),e);});
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAdmin();}});
 
 // ── ADMIN AUTH ────────────────────────────────────────────────
 function openAdminAuth(){if(adminUnlocked){openAdmin();return;}document.getElementById('pwd-overlay').style.display='flex';setTimeout(()=>document.getElementById('pwd-input').focus(),80);}
-function checkPwd(){
-  if(document.getElementById('pwd-input').value===ADMIN_PWD){
+async function checkPwd(){
+  const hash=await sha256(document.getElementById('pwd-input').value);
+  if(hash===ADMIN_PWD_HASH){
     adminUnlocked=true; document.getElementById('pwd-overlay').style.display='none';
     document.getElementById('pwd-input').value=''; openAdmin();
   } else {
@@ -448,8 +469,8 @@ function renderListItems(stamps){
   document.getElementById('adm-count').textContent=`${stamps.length} francobolli`;
   el.innerHTML=stamps.map(s=>`<div class="admin-list-item">
     <div class="ali-info"><div class="ali-title">${esc(s.title)}</div><div class="ali-meta">${s.anno||''} · ${s.serie||''}</div></div>
-    <button class="ali-btn" onclick="editStampById(${s.id})">✏️</button>
-    <button class="ali-btn del" onclick="deleteStampById(${s.id})">🗑️</button>
+    <button class="ali-btn" onclick="editStampById(${s.id})" aria-label="Modifica ${esc(s.title)}">✏️</button>
+    <button class="ali-btn del" onclick="deleteStampById(${s.id})" aria-label="Elimina ${esc(s.title)}">🗑️</button>
   </div>`).join('');
 }
 
@@ -501,7 +522,7 @@ async function saveStamp(){
   const token=localStorage.getItem('gh_token'); if(!token){showStatus('err','Inserisci il token GitHub nelle Impostazioni.');return;}
 
   const stamp={
-    id: editingId||(Math.max(0,...allStamps.map(s=>s.id||0))+1),
+    id: editingId||(allStamps.reduce((m,s)=>Math.max(m,s.id||0),0)+1),
     title, subtitle:gv('f-subtitle'),
     anno:parseInt(gv('f-anno'))||null, valore:gv('f-valore'),
     serie:gv('f-serie'), sassone:gv('f-sassone'),
@@ -523,13 +544,15 @@ async function saveStamp(){
 }
 
 async function deleteStampById(id){
-  const s=allStamps.find(x=>x.id===id);
-  if(!s||!confirm(`Eliminare "${s.title}"?`)) return;
+  const origIdx=allStamps.findIndex(x=>x.id===id);
+  if(origIdx<0) return;
+  const s=allStamps[origIdx];
+  if(!confirm(`Eliminare "${s.title}"?`)) return;
   const token=localStorage.getItem('gh_token');
   if(!token){alert('Inserisci il token GitHub nelle Impostazioni.');return;}
   allStamps=allStamps.filter(x=>x.id!==id);
   if(await pushToGitHub(token)){buildStats();buildSelects();applyFilters();filterList();}
-  else{allStamps.push(s);alert('❌ Errore connessione GitHub. Riprova.');}
+  else{allStamps.splice(origIdx,0,s);alert('❌ Errore connessione GitHub. Riprova.');}
 }
 
 // ── GITHUB API ────────────────────────────────────────────────
@@ -539,7 +562,9 @@ async function pushToGitHub(token){
       {headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json'}});
     if(!g.ok){showStatus('err','❌ Token non valido o repository non trovato.');return false;}
     const {sha}=await g.json();
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(allStamps,null,2))));
+    const jsonStr=JSON.stringify(allStamps,null,2);
+    const bytes=new TextEncoder().encode(jsonStr);
+    const content=btoa(String.fromCharCode(...bytes));
     const p=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
       method:'PUT',
       headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
@@ -585,7 +610,12 @@ function saveToken(){
 }
 function logoutAdmin(){adminUnlocked=false;closeAdmin();}
 
-function esc(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 init();
 </script>
