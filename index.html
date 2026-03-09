@@ -34,6 +34,9 @@ header h1 em{color:var(--gold);font-style:italic;}
 select{font-family:'EB Garamond',serif;font-size:.85rem;padding:.38rem 1.4rem .38rem .8rem;border:1px solid rgba(107,76,42,.3);background:transparent;color:var(--sepia);cursor:pointer;border-radius:2px;transition:all .18s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b4c2a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;}
 select:focus{background-color:var(--sepia);color:var(--cream);}
 .count-badge{font-size:.8rem;color:var(--faded);font-style:italic;white-space:nowrap;margin-left:auto;}
+.view-toggle{display:flex;gap:.3rem;margin-left:.5rem;}
+.view-btn{background:transparent;border:1px solid rgba(107,76,42,.3);color:var(--sepia);padding:.3rem .55rem;cursor:pointer;border-radius:2px;font-size:.9rem;line-height:1;transition:all .15s;}
+.view-btn:hover,.view-btn.active{background:var(--sepia);color:var(--cream);border-color:var(--sepia);}
 
 main{max-width:1300px;margin:0 auto;padding:2rem 1.5rem 5rem;}
 .stamp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:1.8rem;margin-bottom:2.5rem;}
@@ -164,12 +167,34 @@ footer span{color:var(--gold);opacity:.7;}
 .logout-btn:hover{background:rgba(155,58,30,.15);}
 .settings-sep{border:none;border-top:1px solid rgba(255,255,255,.07);margin:1.2rem 0;}
 
+/* TABLE VIEW */
+.stamp-table{width:100%;border-collapse:collapse;margin-bottom:2.5rem;font-size:.9rem;}
+.stamp-table thead th{font-family:'Playfair Display',serif;font-size:.78rem;font-weight:400;letter-spacing:.07em;text-transform:uppercase;color:var(--faded);padding:.55rem .75rem;border-bottom:2px solid rgba(107,76,42,.2);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;}
+.stamp-table thead th:hover{color:var(--sepia);}
+.stamp-table thead th .sort-arrow{margin-left:.3rem;opacity:.4;font-style:normal;}
+.stamp-table thead th.sorted .sort-arrow{opacity:1;color:var(--rust);}
+.stamp-table tbody tr{border-bottom:1px solid rgba(107,76,42,.09);cursor:pointer;transition:background .15s;}
+.stamp-table tbody tr:hover{background:rgba(107,76,42,.05);}
+.stamp-table td{padding:.5rem .75rem;vertical-align:middle;}
+.td-thumb{width:40px;text-align:center;}
+.td-thumb img{width:36px;height:46px;object-fit:cover;display:block;border-radius:1px;filter:sepia(6%);}
+.td-thumb-ph{width:36px;height:46px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#e8dfc8,#d4c9a0);font-size:1rem;}
+.td-title{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--ink);}
+.td-sub{font-size:.76rem;color:var(--faded);font-style:italic;}
+.td-anno{color:var(--sepia);font-size:.88rem;white-space:nowrap;}
+.td-serie{font-size:.82rem;color:var(--sepia);}
+.td-sassone{font-size:.8rem;color:var(--faded);font-family:monospace;}
+.td-valore{font-size:.85rem;color:var(--ink);white-space:nowrap;}
+.td-cond{white-space:nowrap;}
+
 @media(max-width:600px){
   .toolbar{flex-direction:column;}
   .count-badge{margin-left:0;}
+  .view-toggle{margin-left:0;}
   .stamp-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:1.2rem;}
   .admin-sidebar{max-width:100%;}
   .form-row{grid-template-columns:1fr;}
+  .stamp-table thead th.hide-sm,.stamp-table td.hide-sm{display:none;}
 }
 </style>
 </head>
@@ -210,6 +235,10 @@ footer span{color:var(--gold);opacity:.7;}
     <option value="serie">Serie A-Z</option>
   </select>
   <span class="count-badge" id="count-badge"></span>
+  <div class="view-toggle" role="group" aria-label="Modalità di visualizzazione">
+    <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="Vista griglia" aria-pressed="true">⊞</button>
+    <button class="view-btn" id="btn-table" onclick="setView('table')" title="Vista tabella" aria-pressed="false">☰</button>
+  </div>
 </div>
 
 <main>
@@ -274,7 +303,7 @@ const GITHUB_FILE = 'stamps.json';
 const ADMIN_PWD_HASH = '9331a1d273d1c186ac996050b184dd0c616d495c4b6ff7bc9ba016c21cd331ea';
 const PER_PAGE    = 48;
 
-let allStamps = [], filtered = [], page = 1;
+let allStamps = [], filtered = [], page = 1, viewMode = 'grid';
 let adminUnlocked = false, currentModalIdx = -1, editingId = null;
 
 // ── INIT ──────────────────────────────────────────────────────
@@ -331,33 +360,88 @@ function applyFilters() {
   render();
 }
 
+// ── VIEW TOGGLE ───────────────────────────────────────────────
+function setView(mode) {
+  viewMode = mode;
+  const container = document.getElementById('grid');
+  container.className = mode === 'table' ? '' : 'stamp-grid';
+  document.getElementById('btn-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btn-table').classList.toggle('active', mode === 'table');
+  document.getElementById('btn-grid').setAttribute('aria-pressed', mode === 'grid');
+  document.getElementById('btn-table').setAttribute('aria-pressed', mode === 'table');
+  render();
+}
+
 // ── RENDER ────────────────────────────────────────────────────
 function render() {
-  const grid=document.getElementById('grid'), empty=document.getElementById('empty-state');
-  grid.innerHTML='';
-  if(!filtered.length){empty.style.display='block';document.getElementById('pagination').innerHTML='';return;}
-  empty.style.display='none';
+  const container = document.getElementById('grid');
+  const empty = document.getElementById('empty-state');
+  container.innerHTML = '';
+  if (!filtered.length) { empty.style.display = 'block'; document.getElementById('pagination').innerHTML = ''; return; }
+  empty.style.display = 'none';
+  const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  if (viewMode === 'table') renderTable(container, slice);
+  else renderGrid(container, slice);
+  buildPagination();
+}
 
-  filtered.slice((page-1)*PER_PAGE,page*PER_PAGE).forEach((s,i)=>{
-    const gi=allStamps.indexOf(s);
-    const cL={fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione]||'';
-    const img=s.immagine
-      ?`<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
-      :`<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
-    const c=document.createElement('div');
-    c.className='stamp-card'; c.style.animationDelay=`${Math.min(i*.04,.5)}s`; c.onclick=()=>openModal(gi);
-    c.innerHTML=`<div class="stamp-frame"><div class="perf-l"></div><div class="perf-r"></div>
+function renderGrid(container, slice) {
+  container.className = 'stamp-grid';
+  slice.forEach((s, i) => {
+    const gi = allStamps.indexOf(s);
+    const cL = {fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione] || '';
+    const img = s.immagine
+      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
+      : `<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
+    const c = document.createElement('div');
+    c.className = 'stamp-card'; c.style.animationDelay = `${Math.min(i * .04, .5)}s`; c.onclick = () => openModal(gi);
+    c.innerHTML = `<div class="stamp-frame"><div class="perf-l"></div><div class="perf-r"></div>
       <div class="stamp-inner">${img}<span class="stamp-yr">${s.anno||''}</span></div></div>
       <div class="stamp-title">${esc(s.title)}</div>
       <div class="stamp-sub">${esc(s.subtitle||'')}</div>
       <div class="stamp-tags">
-        ${s.serie?`<span class="tag tag-serie">${esc(s.serie)}</span>`:''}
-        ${cL?`<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>`:''}
-        ${s.anno?`<span class="tag tag-anno">${s.anno}</span>`:''}
+        ${s.serie ? `<span class="tag tag-serie">${esc(s.serie)}</span>` : ''}
+        ${cL ? `<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>` : ''}
+        ${s.anno ? `<span class="tag tag-anno">${s.anno}</span>` : ''}
       </div>`;
-    grid.appendChild(c);
+    container.appendChild(c);
   });
-  buildPagination();
+}
+
+function renderTable(container, slice) {
+  container.className = '';
+  const condLabel = {fds:'FDS — Fiore di Stampa', spl:'SPL — Splendido', bb:'BB — Bello'};
+  const rows = slice.map(s => {
+    const gi = allStamps.indexOf(s);
+    const thumb = s.immagine
+      ? `<img src="${s.immagine}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'td-thumb-ph\\'>🇮🇹</div>'">`
+      : `<div class="td-thumb-ph">🇮🇹</div>`;
+    const cond = s.condizione
+      ? `<span class="cond-dot cond-${s.condizione}"></span>${condLabel[s.condizione]||s.condizione}`
+      : '';
+    return `<tr onclick="openModal(${gi})">
+      <td class="td-thumb">${thumb}</td>
+      <td class="td-title">${esc(s.title)}${s.subtitle?`<div class="td-sub">${esc(s.subtitle)}</div>`:''}</td>
+      <td class="td-anno">${s.anno||'—'}</td>
+      <td class="td-serie hide-sm">${esc(s.serie||'—')}</td>
+      <td class="td-sassone hide-sm">${esc(s.sassone||'—')}</td>
+      <td class="td-valore">${esc(s.valore||'—')}</td>
+      <td class="td-cond hide-sm">${cond}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<table class="stamp-table">
+    <thead><tr>
+      <th></th>
+      <th onclick="tableSort('titolo')">Titolo<em class="sort-arrow">⇅</em></th>
+      <th onclick="tableSort('anno-asc')">Anno<em class="sort-arrow">⇅</em></th>
+      <th class="hide-sm" onclick="tableSort('serie')">Serie<em class="sort-arrow">⇅</em></th>
+      <th class="hide-sm">Sassone</th>
+      <th>Valore</th>
+      <th class="hide-sm">Condizione</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function buildPagination() {
@@ -378,6 +462,11 @@ function buildPagination() {
   const info=document.createElement('span');info.className='pg-info';
   info.textContent=`${(page-1)*PER_PAGE+1}–${Math.min(page*PER_PAGE,filtered.length)} di ${filtered.length}`;
   pg.appendChild(info);
+}
+
+function tableSort(key) {
+  document.getElementById('fil-sort').value = key;
+  applyFilters();
 }
 
 // ── DETAIL MODAL ──────────────────────────────────────────────
