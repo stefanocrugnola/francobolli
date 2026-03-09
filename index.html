@@ -34,6 +34,9 @@ header h1 em{color:var(--gold);font-style:italic;}
 select{font-family:'EB Garamond',serif;font-size:.85rem;padding:.38rem 1.4rem .38rem .8rem;border:1px solid rgba(107,76,42,.3);background:transparent;color:var(--sepia);cursor:pointer;border-radius:2px;transition:all .18s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b4c2a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .5rem center;}
 select:focus{background-color:var(--sepia);color:var(--cream);}
 .count-badge{font-size:.8rem;color:var(--faded);font-style:italic;white-space:nowrap;margin-left:auto;}
+.view-toggle{display:flex;gap:.3rem;margin-left:.5rem;}
+.view-btn{background:transparent;border:1px solid rgba(107,76,42,.3);color:var(--sepia);padding:.3rem .55rem;cursor:pointer;border-radius:2px;font-size:.9rem;line-height:1;transition:all .15s;}
+.view-btn:hover,.view-btn.active{background:var(--sepia);color:var(--cream);border-color:var(--sepia);}
 
 main{max-width:1300px;margin:0 auto;padding:2rem 1.5rem 5rem;}
 .stamp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:1.8rem;margin-bottom:2.5rem;}
@@ -164,12 +167,34 @@ footer span{color:var(--gold);opacity:.7;}
 .logout-btn:hover{background:rgba(155,58,30,.15);}
 .settings-sep{border:none;border-top:1px solid rgba(255,255,255,.07);margin:1.2rem 0;}
 
+/* TABLE VIEW */
+.stamp-table{width:100%;border-collapse:collapse;margin-bottom:2.5rem;font-size:.9rem;}
+.stamp-table thead th{font-family:'Playfair Display',serif;font-size:.78rem;font-weight:400;letter-spacing:.07em;text-transform:uppercase;color:var(--faded);padding:.55rem .75rem;border-bottom:2px solid rgba(107,76,42,.2);text-align:left;white-space:nowrap;cursor:pointer;user-select:none;}
+.stamp-table thead th:hover{color:var(--sepia);}
+.stamp-table thead th .sort-arrow{margin-left:.3rem;opacity:.4;font-style:normal;}
+.stamp-table thead th.sorted .sort-arrow{opacity:1;color:var(--rust);}
+.stamp-table tbody tr{border-bottom:1px solid rgba(107,76,42,.09);cursor:pointer;transition:background .15s;}
+.stamp-table tbody tr:hover{background:rgba(107,76,42,.05);}
+.stamp-table td{padding:.5rem .75rem;vertical-align:middle;}
+.td-thumb{width:40px;text-align:center;}
+.td-thumb img{width:36px;height:46px;object-fit:cover;display:block;border-radius:1px;filter:sepia(6%);}
+.td-thumb-ph{width:36px;height:46px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#e8dfc8,#d4c9a0);font-size:1rem;}
+.td-title{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--ink);}
+.td-sub{font-size:.76rem;color:var(--faded);font-style:italic;}
+.td-anno{color:var(--sepia);font-size:.88rem;white-space:nowrap;}
+.td-serie{font-size:.82rem;color:var(--sepia);}
+.td-sassone{font-size:.8rem;color:var(--faded);font-family:monospace;}
+.td-valore{font-size:.85rem;color:var(--ink);white-space:nowrap;}
+.td-cond{white-space:nowrap;}
+
 @media(max-width:600px){
   .toolbar{flex-direction:column;}
   .count-badge{margin-left:0;}
+  .view-toggle{margin-left:0;}
   .stamp-grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:1.2rem;}
   .admin-sidebar{max-width:100%;}
   .form-row{grid-template-columns:1fr;}
+  .stamp-table thead th.hide-sm,.stamp-table td.hide-sm{display:none;}
 }
 </style>
 </head>
@@ -210,6 +235,10 @@ footer span{color:var(--gold);opacity:.7;}
     <option value="serie">Serie A-Z</option>
   </select>
   <span class="count-badge" id="count-badge"></span>
+  <div class="view-toggle" role="group" aria-label="Modalità di visualizzazione">
+    <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="Vista griglia" aria-pressed="true">⊞</button>
+    <button class="view-btn" id="btn-table" onclick="setView('table')" title="Vista tabella" aria-pressed="false">☰</button>
+  </div>
 </div>
 
 <main>
@@ -223,9 +252,9 @@ footer span{color:var(--gold);opacity:.7;}
 </main>
 
 <!-- Detail modal -->
-<div class="modal-backdrop" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" onclick="if(event.target.id==='modal')closeModal()">
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">×</button>
+    <button class="modal-close" onclick="closeModal()" aria-label="Chiudi">×</button>
     <div class="modal-img-wrap" id="m-img"></div>
     <div class="modal-body">
       <h2 id="m-title"></h2>
@@ -238,13 +267,13 @@ footer span{color:var(--gold);opacity:.7;}
 </div>
 
 <!-- Password overlay -->
-<div class="pwd-overlay" id="pwd-overlay" style="display:none;">
+<div class="pwd-overlay" id="pwd-overlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Autenticazione pannello admin">
   <div class="pwd-box">
     <h3>🔐 Pannello Admin</h3>
     <p>Inserisci la password per accedere</p>
-    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()">
+    <input type="password" id="pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPwd()" aria-label="Password admin">
     <button class="pwd-btn" onclick="checkPwd()">Accedi</button>
-    <div class="pwd-error" id="pwd-error" style="display:none;">Password errata. Riprova.</div>
+    <div class="pwd-error" id="pwd-error" style="display:none;" role="alert">Password errata. Riprova.</div>
   </div>
 </div>
 
@@ -270,10 +299,11 @@ footer span{color:var(--gold);opacity:.7;}
 const GITHUB_USER = 'stefanocrugnola';
 const GITHUB_REPO = 'francobolli';
 const GITHUB_FILE = 'stamps.json';
-const ADMIN_PWD   = 'ciaociao';
+// SHA-256 della password 'ciaociao' — la password in chiaro non è mai nel sorgente
+const ADMIN_PWD_HASH = '9331a1d273d1c186ac996050b184dd0c616d495c4b6ff7bc9ba016c21cd331ea';
 const PER_PAGE    = 48;
 
-let allStamps = [], filtered = [], page = 1;
+let allStamps = [], filtered = [], page = 1, viewMode = 'grid';
 let adminUnlocked = false, currentModalIdx = -1, editingId = null;
 
 // ── INIT ──────────────────────────────────────────────────────
@@ -313,7 +343,7 @@ function applyFilters() {
 
   filtered=allStamps.filter(s=>{
     if(ser&&s.serie!==ser) return false;
-    if(ann&&s.anno!=ann) return false;
+    if(ann&&s.anno!==Number(ann)) return false;
     if(cond&&s.condizione!==cond) return false;
     if(q&&!`${s.title} ${s.subtitle} ${s.serie} ${s.sassone} ${s.anno} ${s.note}`.toLowerCase().includes(q)) return false;
     return true;
@@ -330,33 +360,88 @@ function applyFilters() {
   render();
 }
 
+// ── VIEW TOGGLE ───────────────────────────────────────────────
+function setView(mode) {
+  viewMode = mode;
+  const container = document.getElementById('grid');
+  container.className = mode === 'table' ? '' : 'stamp-grid';
+  document.getElementById('btn-grid').classList.toggle('active', mode === 'grid');
+  document.getElementById('btn-table').classList.toggle('active', mode === 'table');
+  document.getElementById('btn-grid').setAttribute('aria-pressed', mode === 'grid');
+  document.getElementById('btn-table').setAttribute('aria-pressed', mode === 'table');
+  render();
+}
+
 // ── RENDER ────────────────────────────────────────────────────
 function render() {
-  const grid=document.getElementById('grid'), empty=document.getElementById('empty-state');
-  grid.innerHTML='';
-  if(!filtered.length){empty.style.display='block';document.getElementById('pagination').innerHTML='';return;}
-  empty.style.display='none';
+  const container = document.getElementById('grid');
+  const empty = document.getElementById('empty-state');
+  container.innerHTML = '';
+  if (!filtered.length) { empty.style.display = 'block'; document.getElementById('pagination').innerHTML = ''; return; }
+  empty.style.display = 'none';
+  const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  if (viewMode === 'table') renderTable(container, slice);
+  else renderGrid(container, slice);
+  buildPagination();
+}
 
-  filtered.slice((page-1)*PER_PAGE,page*PER_PAGE).forEach((s,i)=>{
-    const gi=allStamps.indexOf(s);
-    const cL={fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione]||'';
-    const img=s.immagine
-      ?`<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
-      :`<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
-    const c=document.createElement('div');
-    c.className='stamp-card'; c.style.animationDelay=`${Math.min(i*.04,.5)}s`; c.onclick=()=>openModal(gi);
-    c.innerHTML=`<div class="stamp-frame"><div class="perf-l"></div><div class="perf-r"></div>
+function renderGrid(container, slice) {
+  container.className = 'stamp-grid';
+  slice.forEach((s, i) => {
+    const gi = allStamps.indexOf(s);
+    const cL = {fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione] || '';
+    const img = s.immagine
+      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
+      : `<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
+    const c = document.createElement('div');
+    c.className = 'stamp-card'; c.style.animationDelay = `${Math.min(i * .04, .5)}s`; c.onclick = () => openModal(gi);
+    c.innerHTML = `<div class="stamp-frame"><div class="perf-l"></div><div class="perf-r"></div>
       <div class="stamp-inner">${img}<span class="stamp-yr">${s.anno||''}</span></div></div>
       <div class="stamp-title">${esc(s.title)}</div>
       <div class="stamp-sub">${esc(s.subtitle||'')}</div>
       <div class="stamp-tags">
-        ${s.serie?`<span class="tag tag-serie">${esc(s.serie)}</span>`:''}
-        ${cL?`<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>`:''}
-        ${s.anno?`<span class="tag tag-anno">${s.anno}</span>`:''}
+        ${s.serie ? `<span class="tag tag-serie">${esc(s.serie)}</span>` : ''}
+        ${cL ? `<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>` : ''}
+        ${s.anno ? `<span class="tag tag-anno">${s.anno}</span>` : ''}
       </div>`;
-    grid.appendChild(c);
+    container.appendChild(c);
   });
-  buildPagination();
+}
+
+function renderTable(container, slice) {
+  container.className = '';
+  const condLabel = {fds:'FDS — Fiore di Stampa', spl:'SPL — Splendido', bb:'BB — Bello'};
+  const rows = slice.map(s => {
+    const gi = allStamps.indexOf(s);
+    const thumb = s.immagine
+      ? `<img src="${s.immagine}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'td-thumb-ph\\'>🇮🇹</div>'">`
+      : `<div class="td-thumb-ph">🇮🇹</div>`;
+    const cond = s.condizione
+      ? `<span class="cond-dot cond-${s.condizione}"></span>${condLabel[s.condizione]||s.condizione}`
+      : '';
+    return `<tr onclick="openModal(${gi})">
+      <td class="td-thumb">${thumb}</td>
+      <td class="td-title">${esc(s.title)}${s.subtitle?`<div class="td-sub">${esc(s.subtitle)}</div>`:''}</td>
+      <td class="td-anno">${s.anno||'—'}</td>
+      <td class="td-serie hide-sm">${esc(s.serie||'—')}</td>
+      <td class="td-sassone hide-sm">${esc(s.sassone||'—')}</td>
+      <td class="td-valore">${esc(s.valore||'—')}</td>
+      <td class="td-cond hide-sm">${cond}</td>
+    </tr>`;
+  }).join('');
+
+  container.innerHTML = `<table class="stamp-table">
+    <thead><tr>
+      <th></th>
+      <th onclick="tableSort('titolo')">Titolo<em class="sort-arrow">⇅</em></th>
+      <th onclick="tableSort('anno-asc')">Anno<em class="sort-arrow">⇅</em></th>
+      <th class="hide-sm" onclick="tableSort('serie')">Serie<em class="sort-arrow">⇅</em></th>
+      <th class="hide-sm">Sassone</th>
+      <th>Valore</th>
+      <th class="hide-sm">Condizione</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function buildPagination() {
@@ -368,10 +453,10 @@ function buildPagination() {
   };
   pg.appendChild(mkBtn('← Prec',page-1,page===1,false));
   const range=[];
-  for(let p=1;p<=total;p++){if(p===1||p===total||Math.abs(p-page)<=2)range.push(p);else if(range[range.length-1]!=='…')range.push('…');}
-  range.forEach(p=>{
-    if(p==='…'){const s=document.createElement('span');s.className='pg-info';s.textContent='…';pg.appendChild(s);return;}
-    pg.appendChild(mkBtn(p,p,false,p===page));
+  for(let pn=1;pn<=total;pn++){if(pn===1||pn===total||Math.abs(pn-page)<=2)range.push(pn);else if(range[range.length-1]!=='…')range.push('…');}
+  range.forEach(pn=>{
+    if(pn==='…'){const s=document.createElement('span');s.className='pg-info';s.textContent='…';pg.appendChild(s);return;}
+    pg.appendChild(mkBtn(pn,pn,false,pn===page));
   });
   pg.appendChild(mkBtn('Succ →',page+1,page===total,false));
   const info=document.createElement('span');info.className='pg-info';
@@ -379,8 +464,25 @@ function buildPagination() {
   pg.appendChild(info);
 }
 
+function tableSort(key) {
+  document.getElementById('fil-sort').value = key;
+  applyFilters();
+}
+
 // ── DETAIL MODAL ──────────────────────────────────────────────
+function editFromModal(){closeModal();openAdmin();switchTabByName('form');setTimeout(()=>loadForm(allStamps[currentModalIdx]),80);}
+
+let _lastFocusedEl=null;
+function trapFocus(el,e){
+  const focusable=Array.from(el.querySelectorAll('button,input,select,textarea,[href],[tabindex]:not([tabindex="-1"])')).filter(n=>!n.disabled&&n.offsetParent!==null);
+  if(!focusable.length)return;
+  const first=focusable[0], last=focusable[focusable.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+
 function openModal(idx) {
+  _lastFocusedEl=document.activeElement;
   currentModalIdx=idx; const s=allStamps[idx];
   document.getElementById('m-title').textContent=s.title;
   document.getElementById('m-year').textContent=`${s.anno||''} · ${s.valore||''}`;
@@ -393,17 +495,25 @@ function openModal(idx) {
   const ne=document.getElementById('m-note');
   ne.textContent=s.note||''; ne.style.display=s.note?'block':'none';
   document.getElementById('m-edit-btn').style.display=adminUnlocked?'block':'none';
-  document.getElementById('modal').classList.add('open');
+  const modalEl=document.getElementById('modal');
+  modalEl.classList.add('open');
+  setTimeout(()=>modalEl.querySelector('.modal-close')?.focus(),50);
 }
 
-function editFromModal(){closeModal();openAdmin();switchTabByName('form');setTimeout(()=>loadForm(allStamps[currentModalIdx]),80);}
-function closeModal(){document.getElementById('modal').classList.remove('open');}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  if(_lastFocusedEl){_lastFocusedEl.focus();_lastFocusedEl=null;}
+}
+
+document.getElementById('modal').addEventListener('keydown',e=>{if(e.key==='Tab')trapFocus(document.getElementById('modal'),e);});
+
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAdmin();}});
 
 // ── ADMIN AUTH ────────────────────────────────────────────────
 function openAdminAuth(){if(adminUnlocked){openAdmin();return;}document.getElementById('pwd-overlay').style.display='flex';setTimeout(()=>document.getElementById('pwd-input').focus(),80);}
-function checkPwd(){
-  if(document.getElementById('pwd-input').value===ADMIN_PWD){
+async function checkPwd(){
+  const hash=await sha256(document.getElementById('pwd-input').value);
+  if(hash===ADMIN_PWD_HASH){
     adminUnlocked=true; document.getElementById('pwd-overlay').style.display='none';
     document.getElementById('pwd-input').value=''; openAdmin();
   } else {
@@ -448,8 +558,8 @@ function renderListItems(stamps){
   document.getElementById('adm-count').textContent=`${stamps.length} francobolli`;
   el.innerHTML=stamps.map(s=>`<div class="admin-list-item">
     <div class="ali-info"><div class="ali-title">${esc(s.title)}</div><div class="ali-meta">${s.anno||''} · ${s.serie||''}</div></div>
-    <button class="ali-btn" onclick="editStampById(${s.id})">✏️</button>
-    <button class="ali-btn del" onclick="deleteStampById(${s.id})">🗑️</button>
+    <button class="ali-btn" onclick="editStampById(${s.id})" aria-label="Modifica ${esc(s.title)}">✏️</button>
+    <button class="ali-btn del" onclick="deleteStampById(${s.id})" aria-label="Elimina ${esc(s.title)}">🗑️</button>
   </div>`).join('');
 }
 
@@ -501,7 +611,7 @@ async function saveStamp(){
   const token=localStorage.getItem('gh_token'); if(!token){showStatus('err','Inserisci il token GitHub nelle Impostazioni.');return;}
 
   const stamp={
-    id: editingId||(Math.max(0,...allStamps.map(s=>s.id||0))+1),
+    id: editingId||(allStamps.reduce((m,s)=>Math.max(m,s.id||0),0)+1),
     title, subtitle:gv('f-subtitle'),
     anno:parseInt(gv('f-anno'))||null, valore:gv('f-valore'),
     serie:gv('f-serie'), sassone:gv('f-sassone'),
@@ -523,13 +633,15 @@ async function saveStamp(){
 }
 
 async function deleteStampById(id){
-  const s=allStamps.find(x=>x.id===id);
-  if(!s||!confirm(`Eliminare "${s.title}"?`)) return;
+  const origIdx=allStamps.findIndex(x=>x.id===id);
+  if(origIdx<0) return;
+  const s=allStamps[origIdx];
+  if(!confirm(`Eliminare "${s.title}"?`)) return;
   const token=localStorage.getItem('gh_token');
   if(!token){alert('Inserisci il token GitHub nelle Impostazioni.');return;}
   allStamps=allStamps.filter(x=>x.id!==id);
   if(await pushToGitHub(token)){buildStats();buildSelects();applyFilters();filterList();}
-  else{allStamps.push(s);alert('❌ Errore connessione GitHub. Riprova.');}
+  else{allStamps.splice(origIdx,0,s);alert('❌ Errore connessione GitHub. Riprova.');}
 }
 
 // ── GITHUB API ────────────────────────────────────────────────
@@ -539,7 +651,9 @@ async function pushToGitHub(token){
       {headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json'}});
     if(!g.ok){showStatus('err','❌ Token non valido o repository non trovato.');return false;}
     const {sha}=await g.json();
-    const content=btoa(unescape(encodeURIComponent(JSON.stringify(allStamps,null,2))));
+    const jsonStr=JSON.stringify(allStamps,null,2);
+    const bytes=new TextEncoder().encode(jsonStr);
+    const content=btoa(String.fromCharCode(...bytes));
     const p=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
       method:'PUT',
       headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
@@ -585,7 +699,12 @@ function saveToken(){
 }
 function logoutAdmin(){adminUnlocked=false;closeAdmin();}
 
-function esc(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function sha256(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 init();
 </script>
