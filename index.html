@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Collezione Filatelica — Stefano</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--cream:#f5f0e8;--parchment:#e8dfc8;--ink:#1a1410;--sepia:#6b4c2a;--rust:#9b3a1e;--gold:#c4922a;--gold-light:#d4a840;--faded:#8c7b6a;--shadow-sm:0 2px 8px rgba(26,20,16,.1);--shadow-md:0 6px 24px rgba(26,20,16,.14),0 2px 6px rgba(26,20,16,.07);--shadow-lg:0 14px 44px rgba(26,20,16,.2),0 4px 12px rgba(26,20,16,.1);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -22,12 +23,19 @@ header h1 em{color:var(--gold-light);font-style:italic;}
 .admin-btn{position:absolute;top:1rem;right:1.2rem;background:rgba(245,240,232,.07);border:1px solid rgba(196,146,42,.3);color:rgba(196,146,42,.7);font-size:.78rem;padding:.28rem .65rem;cursor:pointer;border-radius:2px;letter-spacing:.05em;transition:all .2s;z-index:10;}
 .admin-btn:hover{background:rgba(196,146,42,.15);color:var(--gold);}
 
-.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:rgba(107,76,42,.15);border-bottom:2px solid rgba(107,76,42,.15);margin-top:8px;}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:rgba(107,76,42,.15);border-bottom:2px solid rgba(107,76,42,.15);margin-top:8px;}
 .stat-cell{background:linear-gradient(180deg,#faf6ee,var(--cream));padding:1.15rem 1rem;text-align:center;transition:background .22s;}
 .stat-cell:hover{background:linear-gradient(180deg,#f5eddc,#ede5cf);}
 .stat-number{font-family:'Playfair Display',serif;font-size:2.1rem;color:var(--rust);display:block;line-height:1;margin-bottom:.22rem;transition:color .2s;}
 .stat-cell:hover .stat-number{color:#b84420;}
+.stat-cell.manco-cell .stat-number{color:#7a5a10;}
 .stat-label{font-size:.72rem;color:var(--faded);letter-spacing:.08em;text-transform:uppercase;}
+
+/* No config banner */
+.no-config-banner{background:rgba(155,58,30,.08);border:1px solid rgba(155,58,30,.2);border-radius:3px;padding:1.1rem 1.5rem;margin:1.5rem 1.5rem 0;text-align:center;font-style:italic;color:var(--rust);display:none;}
+.no-config-banner strong{font-style:normal;display:block;margin-bottom:.3rem;}
+.no-config-banner button{margin-top:.6rem;background:rgba(155,58,30,.12);border:1px solid rgba(155,58,30,.28);color:var(--rust);font-family:'EB Garamond',serif;font-size:.88rem;padding:.3rem .85rem;cursor:pointer;border-radius:3px;transition:all .18s;}
+.no-config-banner button:hover{background:rgba(155,58,30,.22);}
 
 .toolbar{background:rgba(232,223,200,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(107,76,42,.2);padding:.85rem 1.4rem;position:sticky;top:0;z-index:100;box-shadow:0 3px 14px rgba(26,20,16,.09);display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;}
 .search-wrap{position:relative;flex:1;min-width:160px;}
@@ -66,10 +74,20 @@ main{max-width:1320px;margin:0 auto;padding:2.5rem 1.5rem 5rem;}
 .stamp-tags{display:flex;flex-wrap:wrap;gap:.3rem;}
 .tag{font-size:.66rem;padding:.12rem .55rem;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;}
 .tag-serie{background:rgba(196,146,42,.14);color:#7a5a10;}
-.tag-condiz{background:rgba(155,58,30,.11);color:var(--rust);}
+.tag-condiz{background:rgba(155,58,30,.11);color:var(--rust);display:flex;align-items:center;gap:3px;}
 .tag-anno{background:rgba(26,20,16,.07);color:var(--sepia);}
+.tag-era{background:rgba(107,76,42,.12);color:var(--sepia);}
+.tag-prior{display:flex;align-items:center;gap:3px;}
+.tag-prior-alta{background:rgba(155,58,30,.15);color:var(--rust);}
+.tag-prior-media{background:rgba(196,146,42,.14);color:#7a5a10;}
+.tag-prior-bassa{background:rgba(26,20,16,.07);color:var(--faded);}
 .cond-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px;vertical-align:middle;}
 .cond-fds{background:#4a9e6b;}.cond-spl{background:#c4922a;}.cond-bb{background:#9b3a1e;}
+
+/* Francobolli in mancolista */
+.stamp-card.mancante .stamp-frame{filter:grayscale(55%);opacity:.72;outline:2px dashed rgba(107,76,42,.3);outline-offset:3px;}
+.stamp-card.mancante:hover .stamp-frame{filter:grayscale(0%);opacity:1;}
+.mancolista-ribbon{position:absolute;top:8px;left:-2px;background:var(--sepia);color:var(--cream);font-size:.54rem;font-family:'Playfair Display',serif;letter-spacing:.1em;text-transform:uppercase;padding:.15rem .5rem;z-index:5;box-shadow:1px 1px 3px rgba(26,20,16,.3);}
 
 #empty-state{text-align:center;padding:5rem 2rem;color:var(--faded);display:none;}
 #empty-state .ei{font-size:3.5rem;margin-bottom:1.1rem;opacity:.7;}
@@ -164,13 +182,15 @@ footer span{color:var(--gold-light);opacity:.8;}
 .adm-status.loading{background:rgba(196,146,42,.13);border:1px solid rgba(196,146,42,.28);color:var(--gold);display:block;}
 
 /* Settings */
-.token-box{padding:.9rem;background:rgba(196,146,42,.07);border:1px solid rgba(196,146,42,.18);border-radius:2px;margin-bottom:1rem;}
+.token-box{padding:.9rem;background:rgba(196,146,42,.07);border:1px solid rgba(196,146,42,.18);border-radius:2px;margin-bottom:.6rem;}
 .token-box label{display:block;font-size:.73rem;letter-spacing:.06em;text-transform:uppercase;color:rgba(196,146,42,.65);margin-bottom:.38rem;}
 .token-box input{width:100%;padding:.38rem .6rem;background:rgba(0,0,0,.3);border:1px solid rgba(196,146,42,.22);color:var(--cream);font-family:monospace;font-size:.78rem;border-radius:2px;outline:none;}
 .token-box input:focus{border-color:rgba(196,146,42,.45);}
 .token-hint{font-size:.73rem;color:rgba(245,240,232,.3);font-style:italic;margin-top:.4rem;line-height:1.45;}
-.logout-btn{width:100%;padding:.5rem;background:transparent;border:1px solid rgba(155,58,30,.35);color:#c0614a;font-family:'EB Garamond',serif;font-size:.88rem;cursor:pointer;border-radius:2px;margin-top:1rem;transition:all .2s;}
-.logout-btn:hover{background:rgba(155,58,30,.15);}
+.btn-secondary{width:100%;padding:.5rem;background:rgba(196,146,42,.1);border:1px solid rgba(196,146,42,.25);color:rgba(196,146,42,.75);font-family:'EB Garamond',serif;font-size:.88rem;cursor:pointer;border-radius:2px;margin-top:.5rem;transition:all .2s;}
+.btn-secondary:hover{background:rgba(196,146,42,.2);}
+.btn-danger{width:100%;padding:.5rem;background:transparent;border:1px solid rgba(155,58,30,.35);color:#c0614a;font-family:'EB Garamond',serif;font-size:.88rem;cursor:pointer;border-radius:2px;transition:all .2s;}
+.btn-danger:hover{background:rgba(155,58,30,.15);}
 .settings-sep{border:none;border-top:1px solid rgba(255,255,255,.07);margin:1.2rem 0;}
 
 /* TABLE VIEW */
@@ -181,6 +201,8 @@ footer span{color:var(--gold-light);opacity:.8;}
 .stamp-table thead th.sorted .sort-arrow{opacity:1;color:var(--rust);}
 .stamp-table tbody tr{border-bottom:1px solid rgba(107,76,42,.09);cursor:pointer;transition:background .18s;}
 .stamp-table tbody tr:hover{background:rgba(107,76,42,.06);}
+.stamp-table tbody tr.tr-mancante{opacity:.65;}
+.stamp-table tbody tr.tr-mancante:hover{opacity:1;}
 .stamp-table td{padding:.52rem .8rem;vertical-align:middle;}
 .td-thumb{width:44px;text-align:center;}
 .td-thumb img{width:38px;height:48px;object-fit:cover;display:block;border-radius:1px;filter:sepia(6%);box-shadow:0 1px 4px rgba(26,20,16,.15);}
@@ -192,6 +214,7 @@ footer span{color:var(--gold-light);opacity:.8;}
 .td-sassone{font-size:.8rem;color:var(--faded);font-family:monospace;}
 .td-valore{font-size:.85rem;color:var(--ink);white-space:nowrap;}
 .td-cond{white-space:nowrap;}
+.td-era{font-size:.76rem;color:var(--faded);}
 
 @media(max-width:600px){
   .toolbar{flex-direction:column;}
@@ -210,15 +233,22 @@ footer span{color:var(--gold-light);opacity:.8;}
   <button class="admin-btn" onclick="openAdminAuth()">🔐 Admin</button>
   <span class="header-ornament">✦ &nbsp; Collezione Privata &nbsp; ✦</span>
   <h1>Filatelia <em>Italiana</em></h1>
-  <p class="header-sub">Repubblica Italiana &middot; 1996 – 2025</p>
+  <p class="header-sub">Dal Regno d'Italia alla Repubblica &middot; 1850 – oggi</p>
   <div class="header-rule"></div>
 </header>
 
 <div class="stats-bar">
-  <div class="stat-cell"><span class="stat-number" id="s-tot">—</span><span class="stat-label">Esemplari</span></div>
+  <div class="stat-cell"><span class="stat-number" id="s-tot">—</span><span class="stat-label">In Collezione</span></div>
   <div class="stat-cell"><span class="stat-number" id="s-fds">—</span><span class="stat-label">FDS / SPL</span></div>
+  <div class="stat-cell manco-cell"><span class="stat-number" id="s-manco">—</span><span class="stat-label">Mancolista</span></div>
   <div class="stat-cell"><span class="stat-number" id="s-serie">—</span><span class="stat-label">Serie</span></div>
   <div class="stat-cell"><span class="stat-number" id="s-anni">—</span><span class="stat-label">Anni coperti</span></div>
+</div>
+
+<div id="no-config-banner" class="no-config-banner">
+  <strong>Database non configurato</strong>
+  Apri il pannello Admin → Impostazioni per collegare il tuo progetto Supabase.
+  <br><button onclick="openAdminAuth()">⚙️ Configura ora</button>
 </div>
 
 <div class="toolbar">
@@ -226,6 +256,17 @@ footer span{color:var(--gold-light);opacity:.8;}
     <span class="si">🔍</span>
     <input type="text" id="search" placeholder="Cerca francobollo, serie, Sassone…" oninput="applyFilters()">
   </div>
+  <select id="fil-era" onchange="applyFilters()">
+    <option value="">Tutte le ere</option>
+    <option value="antichi-stati">Antichi Stati (1850–1861)</option>
+    <option value="regno">Regno d'Italia (1862–1945)</option>
+    <option value="repubblica">Repubblica (1946–oggi)</option>
+  </select>
+  <select id="fil-collez" onchange="applyFilters()">
+    <option value="">Tutta la filatelia</option>
+    <option value="si">In collezione</option>
+    <option value="no">Mancolista</option>
+  </select>
   <select id="fil-serie" onchange="applyFilters()"><option value="">Tutte le serie</option></select>
   <select id="fil-anno" onchange="applyFilters()"><option value="">Tutti gli anni</option></select>
   <select id="fil-cond" onchange="applyFilters()">
@@ -302,31 +343,50 @@ footer span{color:var(--gold-light);opacity:.8;}
 <footer>Collezione di <span>Stefano</span> &mdash; aggiornata a marzo 2026</footer>
 
 <script>
-const GITHUB_USER = 'stefanocrugnola';
-const GITHUB_REPO = 'francobolli';
-const GITHUB_FILE = 'stamps.json';
-// SHA-256 della password 'ciaociao' — la password in chiaro non è mai nel sorgente
+// SHA-256 della password 'ciaociao'
 const ADMIN_PWD_HASH = '9331a1d273d1c186ac996050b184dd0c616d495c4b6ff7bc9ba016c21cd331ea';
-const PER_PAGE    = 48;
+const PER_PAGE = 48;
 
 let allStamps = [], filtered = [], page = 1, viewMode = 'grid';
 let adminUnlocked = false, currentModalIdx = -1, editingId = null;
 
-// ── INIT ──────────────────────────────────────────────────────
-async function init() {
-  try {
-    const r = await fetch('stamps.json?_=' + Date.now());
-    allStamps = await r.json();
-  } catch(e) { allStamps = []; }
-  buildSelects(); buildStats(); applyFilters();
+// ── SUPABASE ──────────────────────────────────────────────────
+function getDB() {
+  const url = localStorage.getItem('sb_url');
+  const key = localStorage.getItem('sb_key');
+  if (!url || !key) return null;
+  return window.supabase.createClient(url, key);
 }
 
+// ── INIT ──────────────────────────────────────────────────────
+async function init() {
+  const db = getDB();
+  if (!db) {
+    document.getElementById('no-config-banner').style.display = 'block';
+    buildStats(); applyFilters();
+    return;
+  }
+  document.getElementById('no-config-banner').style.display = 'none';
+
+  const { data, error } = await db.from('stamps')
+    .select('*')
+    .order('anno', { ascending: true });
+
+  if (error) { console.error(error); allStamps = []; }
+  else allStamps = data || [];
+
+  buildStats(); buildSelects(); applyFilters();
+}
+
+// ── STATS ─────────────────────────────────────────────────────
 function buildStats() {
-  document.getElementById('s-tot').textContent   = allStamps.length;
-  document.getElementById('s-fds').textContent   = allStamps.filter(s=>s.condizione==='fds'||s.condizione==='spl').length;
-  document.getElementById('s-serie').textContent = [...new Set(allStamps.map(s=>s.serie).filter(Boolean))].length;
-  const a = allStamps.map(s=>s.anno).filter(Boolean);
-  document.getElementById('s-anni').textContent  = a.length ? `${Math.min(...a)}–${Math.max(...a)}` : '—';
+  const owned = allStamps.filter(s => s.posseduto);
+  document.getElementById('s-tot').textContent    = owned.length;
+  document.getElementById('s-fds').textContent    = owned.filter(s => s.condizione==='fds'||s.condizione==='spl').length;
+  document.getElementById('s-manco').textContent  = allStamps.filter(s => !s.posseduto).length;
+  document.getElementById('s-serie').textContent  = [...new Set(owned.map(s=>s.serie).filter(Boolean))].length;
+  const anni = owned.map(s=>s.anno).filter(Boolean);
+  document.getElementById('s-anni').textContent   = anni.length ? `${Math.min(...anni)}–${Math.max(...anni)}` : '—';
 }
 
 function buildSelects() {
@@ -341,27 +401,32 @@ function buildSelects() {
 
 // ── FILTERS ───────────────────────────────────────────────────
 function applyFilters() {
-  const q=document.getElementById('search').value.toLowerCase().trim();
-  const ser=document.getElementById('fil-serie').value;
-  const ann=document.getElementById('fil-anno').value;
-  const cond=document.getElementById('fil-cond').value;
-  const sort=document.getElementById('fil-sort').value;
+  const q      = document.getElementById('search').value.toLowerCase().trim();
+  const era    = document.getElementById('fil-era').value;
+  const collez = document.getElementById('fil-collez').value;
+  const ser    = document.getElementById('fil-serie').value;
+  const ann    = document.getElementById('fil-anno').value;
+  const cond   = document.getElementById('fil-cond').value;
+  const sort   = document.getElementById('fil-sort').value;
 
-  filtered=allStamps.filter(s=>{
-    if(ser&&s.serie!==ser) return false;
-    if(ann&&s.anno!==Number(ann)) return false;
-    if(cond&&s.condizione!==cond) return false;
-    if(q&&!`${s.title} ${s.subtitle} ${s.serie} ${s.sassone} ${s.anno} ${s.note}`.toLowerCase().includes(q)) return false;
+  filtered = allStamps.filter(s => {
+    if (era    && s.era !== era)           return false;
+    if (collez === 'si' && !s.posseduto)  return false;
+    if (collez === 'no' &&  s.posseduto)  return false;
+    if (ser    && s.serie !== ser)         return false;
+    if (ann    && s.anno !== Number(ann))  return false;
+    if (cond   && s.condizione !== cond)   return false;
+    if (q && !`${s.title} ${s.subtitle} ${s.serie} ${s.sassone} ${s.anno} ${s.note}`.toLowerCase().includes(q)) return false;
     return true;
   });
 
-  if(sort==='anno-asc')  filtered.sort((a,b)=>(a.anno||0)-(b.anno||0));
-  if(sort==='anno-desc') filtered.sort((a,b)=>(b.anno||0)-(a.anno||0));
-  if(sort==='titolo')    filtered.sort((a,b)=>a.title.localeCompare(b.title,'it'));
-  if(sort==='serie')     filtered.sort((a,b)=>(a.serie||'').localeCompare(b.serie||'','it'));
+  if (sort==='anno-asc')  filtered.sort((a,b)=>(a.anno||0)-(b.anno||0));
+  if (sort==='anno-desc') filtered.sort((a,b)=>(b.anno||0)-(a.anno||0));
+  if (sort==='titolo')    filtered.sort((a,b)=>a.title.localeCompare(b.title,'it'));
+  if (sort==='serie')     filtered.sort((a,b)=>(a.serie||'').localeCompare(b.serie||'','it'));
 
-  page=1;
-  document.getElementById('count-badge').textContent = filtered.length===allStamps.length
+  page = 1;
+  document.getElementById('count-badge').textContent = filtered.length === allStamps.length
     ? `${allStamps.length} esemplari` : `${filtered.length} di ${allStamps.length}`;
   render();
 }
@@ -369,12 +434,10 @@ function applyFilters() {
 // ── VIEW TOGGLE ───────────────────────────────────────────────
 function setView(mode) {
   viewMode = mode;
-  const container = document.getElementById('grid');
-  container.className = mode === 'table' ? '' : 'stamp-grid';
-  document.getElementById('btn-grid').classList.toggle('active', mode === 'grid');
-  document.getElementById('btn-table').classList.toggle('active', mode === 'table');
-  document.getElementById('btn-grid').setAttribute('aria-pressed', mode === 'grid');
-  document.getElementById('btn-table').setAttribute('aria-pressed', mode === 'table');
+  document.getElementById('btn-grid').classList.toggle('active', mode==='grid');
+  document.getElementById('btn-table').classList.toggle('active', mode==='table');
+  document.getElementById('btn-grid').setAttribute('aria-pressed', mode==='grid');
+  document.getElementById('btn-table').setAttribute('aria-pressed', mode==='table');
   render();
 }
 
@@ -383,33 +446,48 @@ function render() {
   const container = document.getElementById('grid');
   const empty = document.getElementById('empty-state');
   container.innerHTML = '';
-  if (!filtered.length) { empty.style.display = 'block'; document.getElementById('pagination').innerHTML = ''; return; }
+  if (!filtered.length) { empty.style.display='block'; document.getElementById('pagination').innerHTML=''; return; }
   empty.style.display = 'none';
-  const slice = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
-  if (viewMode === 'table') renderTable(container, slice);
+  const slice = filtered.slice((page-1)*PER_PAGE, page*PER_PAGE);
+  if (viewMode==='table') renderTable(container, slice);
   else renderGrid(container, slice);
   buildPagination();
 }
 
+const ERA_LABEL = { 'antichi-stati':'Antichi Stati', 'regno':"Regno d'Italia", 'repubblica':'Rep. Italiana' };
+const ERA_ICON  = { 'antichi-stati':'⚜️', 'regno':'👑', 'repubblica':'🇮🇹' };
+
 function renderGrid(container, slice) {
   container.className = 'stamp-grid';
   slice.forEach((s, i) => {
-    const gi = allStamps.indexOf(s);
-    const cL = {fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione] || '';
+    const gi  = allStamps.indexOf(s);
+    const cL  = {fds:'FDS',spl:'SPL',bb:'BB'}[s.condizione] || '';
+    const era = s.era || 'repubblica';
+    const eraLabel = ERA_LABEL[era] || 'Rep. Italiana';
+    const eraIcon  = ERA_ICON[era]  || '🇮🇹';
+
     const img = s.immagine
-      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>🇮🇹</div><div class=\\'ph-label\\'>Rep. Italiana</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
-      : `<div class="stamp-placeholder"><div class="ph-flag">🇮🇹</div><div class="ph-label">Rep. Italiana</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
+      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>${eraIcon}</div><div class=\\'ph-label\\'>${eraLabel}</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
+      : `<div class="stamp-placeholder"><div class="ph-flag">${eraIcon}</div><div class="ph-label">${eraLabel}</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
+
     const c = document.createElement('div');
-    c.className = 'stamp-card'; c.style.animationDelay = `${Math.min(i * .04, .5)}s`; c.onclick = () => openModal(gi);
-    c.innerHTML = `<div class="stamp-frame"><div class="perf-l"></div><div class="perf-r"></div>
-      <div class="stamp-inner">${img}<span class="stamp-yr">${s.anno||''}</span></div></div>
-      <div class="stamp-title">${esc(s.title)}</div>
-      <div class="stamp-sub">${esc(s.subtitle||'')}</div>
-      <div class="stamp-tags">
-        ${s.serie ? `<span class="tag tag-serie">${esc(s.serie)}</span>` : ''}
-        ${cL ? `<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>` : ''}
-        ${s.anno ? `<span class="tag tag-anno">${s.anno}</span>` : ''}
-      </div>`;
+    c.className = 'stamp-card' + (s.posseduto ? '' : ' mancante');
+    c.style.animationDelay = `${Math.min(i * .04, .5)}s`;
+    c.onclick = () => openModal(gi);
+    c.innerHTML = `<div class="stamp-frame">
+      ${!s.posseduto ? '<div class="mancolista-ribbon">Cerco</div>' : ''}
+      <div class="perf-l"></div><div class="perf-r"></div>
+      <div class="stamp-inner">${img}<span class="stamp-yr">${s.anno||''}</span></div>
+    </div>
+    <div class="stamp-title">${esc(s.title)}</div>
+    <div class="stamp-sub">${esc(s.subtitle||'')}</div>
+    <div class="stamp-tags">
+      ${s.serie ? `<span class="tag tag-serie">${esc(s.serie)}</span>` : ''}
+      ${era !== 'repubblica' ? `<span class="tag tag-era">${eraLabel}</span>` : ''}
+      ${cL && s.posseduto ? `<span class="tag tag-condiz"><span class="cond-dot cond-${s.condizione}"></span>${cL}</span>` : ''}
+      ${!s.posseduto && s.priorita ? `<span class="tag tag-prior tag-prior-${s.priorita}">${s.priorita}</span>` : ''}
+      ${s.anno ? `<span class="tag tag-anno">${s.anno}</span>` : ''}
+    </div>`;
     container.appendChild(c);
   });
 }
@@ -418,18 +496,21 @@ function renderTable(container, slice) {
   container.className = '';
   const condLabel = {fds:'FDS — Fiore di Stampa', spl:'SPL — Splendido', bb:'BB — Bello'};
   const rows = slice.map(s => {
-    const gi = allStamps.indexOf(s);
+    const gi   = allStamps.indexOf(s);
+    const era  = s.era || 'repubblica';
+    const icon = ERA_ICON[era] || '🇮🇹';
     const thumb = s.immagine
-      ? `<img src="${s.immagine}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'td-thumb-ph\\'>🇮🇹</div>'">`
-      : `<div class="td-thumb-ph">🇮🇹</div>`;
-    const cond = s.condizione
+      ? `<img src="${s.immagine}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'td-thumb-ph\\'>${icon}</div>'">`
+      : `<div class="td-thumb-ph">${icon}</div>`;
+    const cond = s.posseduto && s.condizione
       ? `<span class="cond-dot cond-${s.condizione}"></span>${condLabel[s.condizione]||s.condizione}`
-      : '';
-    return `<tr onclick="openModal(${gi})">
+      : (!s.posseduto ? `<em style="color:var(--sepia);font-size:.8rem;">mancolista</em>` : '');
+    return `<tr class="${s.posseduto?'':'tr-mancante'}" onclick="openModal(${gi})">
       <td class="td-thumb">${thumb}</td>
       <td class="td-title">${esc(s.title)}${s.subtitle?`<div class="td-sub">${esc(s.subtitle)}</div>`:''}</td>
       <td class="td-anno">${s.anno||'—'}</td>
       <td class="td-serie hide-sm">${esc(s.serie||'—')}</td>
+      <td class="td-era hide-sm">${ERA_LABEL[era]||era}</td>
       <td class="td-sassone hide-sm">${esc(s.sassone||'—')}</td>
       <td class="td-valore">${esc(s.valore||'—')}</td>
       <td class="td-cond hide-sm">${cond}</td>
@@ -442,6 +523,7 @@ function renderTable(container, slice) {
       <th onclick="tableSort('titolo')">Titolo<em class="sort-arrow">⇅</em></th>
       <th onclick="tableSort('anno-asc')">Anno<em class="sort-arrow">⇅</em></th>
       <th class="hide-sm" onclick="tableSort('serie')">Serie<em class="sort-arrow">⇅</em></th>
+      <th class="hide-sm">Era</th>
       <th class="hide-sm">Sassone</th>
       <th>Valore</th>
       <th class="hide-sm">Condizione</th>
@@ -488,22 +570,39 @@ function trapFocus(el,e){
 }
 
 function openModal(idx) {
-  _lastFocusedEl=document.activeElement;
-  currentModalIdx=idx; const s=allStamps[idx];
-  document.getElementById('m-title').textContent=s.title;
-  document.getElementById('m-year').textContent=`${s.anno||''} · ${s.valore||''}`;
-  document.getElementById('m-img').innerHTML=s.immagine
-    ?`<img src="${s.immagine}" alt="${esc(s.title)}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🇮🇹</div>'">`
-    :`<div class="modal-img-ph">🇮🇹</div>`;
-  const fields=[['Serie',s.serie],['Sassone',s.sassone],['Dentellatura',s.dentellatura],['Carta',s.carta],['Colore',s.colore],['Valore',s.valore],['Condizione',{fds:'FDS — Fiore di Stampa',spl:'SPL — Splendido',bb:'BB — Bello'}[s.condizione]||s.condizione]];
-  document.getElementById('m-rows').innerHTML=fields.filter(([,v])=>v).map(([l,v])=>
-    `<div class="modal-row"><span class="modal-row-label">${l}</span><span class="modal-row-value">${esc(String(v))}</span></div>`).join('');
-  const ne=document.getElementById('m-note');
-  ne.textContent=s.note||''; ne.style.display=s.note?'block':'none';
-  document.getElementById('m-edit-btn').style.display=adminUnlocked?'block':'none';
-  const modalEl=document.getElementById('modal');
+  _lastFocusedEl = document.activeElement;
+  currentModalIdx = idx; const s = allStamps[idx];
+  document.getElementById('m-title').textContent = s.title;
+  document.getElementById('m-year').textContent  = `${s.anno||''} · ${s.valore||''}`;
+  document.getElementById('m-img').innerHTML = s.immagine
+    ? `<img src="${s.immagine}" alt="${esc(s.title)}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🇮🇹</div>'">`
+    : `<div class="modal-img-ph">${ERA_ICON[s.era]||'🇮🇹'}</div>`;
+
+  const eraLabel = ERA_LABEL[s.era] || s.era || '—';
+  const statoColl = s.posseduto
+    ? ({fds:'FDS — Fiore di Stampa',spl:'SPL — Splendido',bb:'BB — Bello'}[s.condizione] || s.condizione || '—')
+    : `In mancolista${s.priorita ? ` · priorità ${s.priorita}` : ''}`;
+
+  const fields = [
+    ['Era storica', eraLabel],
+    ['Serie',       s.serie],
+    ['Sassone',     s.sassone],
+    ['Dentellatura',s.dentellatura],
+    ['Carta',       s.carta],
+    ['Colore',      s.colore],
+    ['Valore',      s.valore],
+    ['Stato',       statoColl],
+  ];
+  document.getElementById('m-rows').innerHTML = fields
+    .filter(([,v])=>v)
+    .map(([l,v])=>`<div class="modal-row"><span class="modal-row-label">${l}</span><span class="modal-row-value">${esc(String(v))}</span></div>`)
+    .join('');
+  const ne = document.getElementById('m-note');
+  ne.textContent = s.note||''; ne.style.display = s.note ? 'block' : 'none';
+  document.getElementById('m-edit-btn').style.display = adminUnlocked ? 'block' : 'none';
+  const modalEl = document.getElementById('modal');
   modalEl.classList.add('open');
-  setTimeout(()=>modalEl.querySelector('.modal-close')?.focus(),50);
+  setTimeout(()=>modalEl.querySelector('.modal-close')?.focus(), 50);
 }
 
 function closeModal(){
@@ -512,7 +611,6 @@ function closeModal(){
 }
 
 document.getElementById('modal').addEventListener('keydown',e=>{if(e.key==='Tab')trapFocus(document.getElementById('modal'),e);});
-
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAdmin();}});
 
 // ── ADMIN AUTH ────────────────────────────────────────────────
@@ -556,29 +654,50 @@ function renderList(body){
   renderListItems(allStamps);
 }
 function filterList(){
-  const q=document.getElementById('adm-q').value.toLowerCase();
+  const q=document.getElementById('adm-q')?.value.toLowerCase()||'';
   renderListItems(allStamps.filter(s=>`${s.title} ${s.serie} ${s.anno} ${s.sassone}`.toLowerCase().includes(q)));
 }
 function renderListItems(stamps){
   const el=document.getElementById('adm-list'); if(!el) return;
   document.getElementById('adm-count').textContent=`${stamps.length} francobolli`;
   el.innerHTML=stamps.map(s=>`<div class="admin-list-item">
-    <div class="ali-info"><div class="ali-title">${esc(s.title)}</div><div class="ali-meta">${s.anno||''} · ${s.serie||''}</div></div>
+    <div class="ali-info">
+      <div class="ali-title">${s.posseduto?'':'📋 '}${esc(s.title)}</div>
+      <div class="ali-meta">${s.anno||''} · ${ERA_LABEL[s.era]||''} · ${s.serie||''}</div>
+    </div>
     <button class="ali-btn" onclick="editStampById(${s.id})" aria-label="Modifica ${esc(s.title)}">✏️</button>
     <button class="ali-btn del" onclick="deleteStampById(${s.id})" aria-label="Elimina ${esc(s.title)}">🗑️</button>
   </div>`).join('');
 }
 
 // ── FORM TAB ──────────────────────────────────────────────────
-function renderForm(body,stamp=null){
-  editingId=stamp?stamp.id:null; const s=stamp||{};
-  body.innerHTML=`<button class="new-btn" onclick="renderForm(document.getElementById('admin-body'))">+ Nuovo francobollo</button>
-  ${editingId?`<p style="font-size:.8rem;color:var(--gold);margin-bottom:.8rem;font-style:italic;">Modifica: ${esc(s.title||'')}</p>`:''}
+function renderForm(body, stamp=null){
+  editingId = stamp ? stamp.id : null;
+  const s = stamp || {};
+  const posseduto = s.hasOwnProperty('posseduto') ? s.posseduto : true;
+  body.innerHTML = `
+  <button class="new-btn" onclick="renderForm(document.getElementById('admin-body'))">+ Nuovo francobollo</button>
+  ${editingId ? `<p style="font-size:.8rem;color:var(--gold);margin-bottom:.8rem;font-style:italic;">Modifica: ${esc(s.title||'')}</p>` : ''}
   <div class="form-group"><label>Titolo *</label><input id="f-title" value="${esc(s.title||'')}"></div>
   <div class="form-group"><label>Sottotitolo</label><input id="f-subtitle" value="${esc(s.subtitle||'')}"></div>
   <div class="form-row">
-    <div class="form-group"><label>Anno</label><input id="f-anno" type="number" min="1800" max="2099" value="${s.anno||''}"></div>
+    <div class="form-group"><label>Anno</label><input id="f-anno" type="number" min="1850" max="2099" value="${s.anno||''}"></div>
     <div class="form-group"><label>Valore</label><input id="f-valore" value="${esc(s.valore||'')}"></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Era storica</label>
+      <select id="f-era">
+        <option value="repubblica"${(!s.era||s.era==='repubblica')?' selected':''}>Repubblica (1946–oggi)</option>
+        <option value="regno"${s.era==='regno'?' selected':''}>Regno d'Italia (1862–1945)</option>
+        <option value="antichi-stati"${s.era==='antichi-stati'?' selected':''}>Antichi Stati (1850–1861)</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Stato collezione</label>
+      <select id="f-posseduto" onchange="togglePossedutoForm()">
+        <option value="true"${posseduto?' selected':''}>In collezione</option>
+        <option value="false"${!posseduto?' selected':''}>In mancolista</option>
+      </select>
+    </div>
   </div>
   <div class="form-row">
     <div class="form-group"><label>Serie</label><input id="f-serie" value="${esc(s.serie||'')}"></div>
@@ -590,11 +709,18 @@ function renderForm(body,stamp=null){
   </div>
   <div class="form-row">
     <div class="form-group"><label>Colore</label><input id="f-colore" value="${esc(s.colore||'')}"></div>
-    <div class="form-group"><label>Condizione</label>
+    <div class="form-group" id="fg-cond" style="display:${posseduto?'block':'none'}"><label>Condizione</label>
       <select id="f-cond">
         <option value="fds"${s.condizione==='fds'?' selected':''}>FDS — Fiore di Stampa</option>
         <option value="spl"${s.condizione==='spl'?' selected':''}>SPL — Splendido</option>
         <option value="bb"${s.condizione==='bb'?' selected':''}>BB — Bello</option>
+      </select>
+    </div>
+    <div class="form-group" id="fg-prio" style="display:${!posseduto?'block':'none'}"><label>Priorità ricerca</label>
+      <select id="f-priorita">
+        <option value="alta"${s.priorita==='alta'?' selected':''}>Alta</option>
+        <option value="media"${s.priorita==='media'||!s.priorita?' selected':''}>Media</option>
+        <option value="bassa"${s.priorita==='bassa'?' selected':''}>Bassa</option>
       </select>
     </div>
   </div>
@@ -607,108 +733,181 @@ function renderForm(body,stamp=null){
   <div class="adm-status" id="adm-status"></div>`;
 }
 
+function togglePossedutoForm(){
+  const p = document.getElementById('f-posseduto').value === 'true';
+  document.getElementById('fg-cond').style.display = p ? 'block' : 'none';
+  document.getElementById('fg-prio').style.display = p ? 'none'  : 'block';
+}
+
 function loadForm(s){renderForm(document.getElementById('admin-body'),s);}
 function editStampById(id){switchTabByName('form');setTimeout(()=>loadForm(allStamps.find(s=>s.id===id)),50);}
-
 function gv(id){return document.getElementById(id)?.value?.trim()||'';}
 
+// ── SAVE / DELETE ─────────────────────────────────────────────
 async function saveStamp(){
-  const title=gv('f-title'); if(!title){showStatus('err','Il titolo è obbligatorio.');return;}
-  const token=localStorage.getItem('gh_token'); if(!token){showStatus('err','Inserisci il token GitHub nelle Impostazioni.');return;}
+  const db = getDB();
+  if (!db){ showStatus('err','Configura Supabase nelle Impostazioni.'); return; }
 
-  const stamp={
-    id: editingId||(allStamps.reduce((m,s)=>Math.max(m,s.id||0),0)+1),
-    title, subtitle:gv('f-subtitle'),
-    anno:parseInt(gv('f-anno'))||null, valore:gv('f-valore'),
-    serie:gv('f-serie'), sassone:gv('f-sassone'),
-    dentellatura:gv('f-dent'), carta:gv('f-carta'), colore:gv('f-colore'),
-    categoria:'repubblica', condizione:document.getElementById('f-cond').value,
-    immagine:gv('f-img')||null, note:gv('f-note')
+  const title = gv('f-title');
+  if (!title){ showStatus('err','Il titolo è obbligatorio.'); return; }
+
+  const posseduto = document.getElementById('f-posseduto').value === 'true';
+
+  const stamp = {
+    title,
+    subtitle:    gv('f-subtitle') || null,
+    anno:        parseInt(gv('f-anno')) || null,
+    valore:      gv('f-valore')  || null,
+    serie:       gv('f-serie')   || null,
+    sassone:     gv('f-sassone') || null,
+    dentellatura:gv('f-dent')    || null,
+    carta:       gv('f-carta')   || null,
+    colore:      gv('f-colore')  || null,
+    era:         document.getElementById('f-era').value || 'repubblica',
+    posseduto,
+    condizione:  posseduto ? document.getElementById('f-cond').value    : null,
+    priorita:   !posseduto ? document.getElementById('f-priorita').value : null,
+    immagine:    gv('f-img') || null,
+    note:        gv('f-note') || null,
   };
 
-  if(editingId){const i=allStamps.findIndex(s=>s.id===editingId);if(i>=0)allStamps[i]=stamp;}
-  else allStamps.push(stamp);
+  showStatus('loading', editingId ? 'Salvataggio in corso…' : 'Aggiunta in corso…');
 
-  showStatus('loading',editingId?'Salvataggio in corso…':'Aggiunta in corso…');
-  if(await pushToGitHub(token)){
-    buildStats();buildSelects();applyFilters();
-    showStatus('ok',editingId?'✅ Modifiche salvate su GitHub!':'✅ Francobollo aggiunto su GitHub!');
-    editingId=null;
-    setTimeout(()=>renderForm(document.getElementById('admin-body')),2000);
+  let error;
+  if (editingId) {
+    ({ error } = await db.from('stamps').update(stamp).eq('id', editingId));
+    if (!error){
+      const i = allStamps.findIndex(s=>s.id===editingId);
+      if (i>=0) allStamps[i] = { ...stamp, id: editingId };
+    }
+  } else {
+    const { data, error: ie } = await db.from('stamps').insert(stamp).select().single();
+    error = ie;
+    if (!error && data) allStamps.push(data);
   }
+
+  if (error){ showStatus('err','❌ Errore: ' + error.message); return; }
+
+  buildStats(); buildSelects(); applyFilters();
+  showStatus('ok', editingId ? '✅ Modifiche salvate!' : '✅ Francobollo aggiunto!');
+  editingId = null;
+  setTimeout(()=>renderForm(document.getElementById('admin-body')), 2000);
 }
 
 async function deleteStampById(id){
-  const origIdx=allStamps.findIndex(x=>x.id===id);
-  if(origIdx<0) return;
-  const s=allStamps[origIdx];
-  if(!confirm(`Eliminare "${s.title}"?`)) return;
-  const token=localStorage.getItem('gh_token');
-  if(!token){alert('Inserisci il token GitHub nelle Impostazioni.');return;}
-  allStamps=allStamps.filter(x=>x.id!==id);
-  if(await pushToGitHub(token)){buildStats();buildSelects();applyFilters();filterList();}
-  else{allStamps.splice(origIdx,0,s);alert('❌ Errore connessione GitHub. Riprova.');}
+  const origIdx = allStamps.findIndex(x=>x.id===id);
+  if (origIdx<0) return;
+  const s = allStamps[origIdx];
+  if (!confirm(`Eliminare "${s.title}"?`)) return;
+
+  const db = getDB();
+  if (!db){ alert('Configura Supabase nelle Impostazioni.'); return; }
+
+  const { error } = await db.from('stamps').delete().eq('id', id);
+  if (error){ alert('❌ Errore: ' + error.message); return; }
+
+  allStamps = allStamps.filter(x=>x.id!==id);
+  buildStats(); buildSelects(); applyFilters(); filterList();
 }
 
-// ── GITHUB API ────────────────────────────────────────────────
-async function pushToGitHub(token){
-  try{
-    const g=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,
-      {headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json'}});
-    if(!g.ok){showStatus('err','❌ Token non valido o repository non trovato.');return false;}
-    const {sha}=await g.json();
-    const jsonStr=JSON.stringify(allStamps,null,2);
-    const bytes=new TextEncoder().encode(jsonStr);
-    const content=btoa(String.fromCharCode(...bytes));
-    const p=await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/${GITHUB_FILE}`,{
-      method:'PUT',
-      headers:{'Authorization':`Bearer ${token}`,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:`Collezione aggiornata — ${new Date().toLocaleDateString('it-IT')}`,content,sha})
-    });
-    if(!p.ok){showStatus('err','❌ Errore salvataggio. Verifica i permessi del token.');return false;}
-    return true;
-  }catch(e){showStatus('err','❌ Errore di rete.');return false;}
-}
-
-function showStatus(type,msg){
-  const el=document.getElementById('adm-status'); if(!el) return;
-  el.className='adm-status '+type; el.textContent=msg;
+function showStatus(type, msg){
+  const el = document.getElementById('adm-status'); if(!el) return;
+  el.className = 'adm-status ' + type; el.textContent = msg;
 }
 
 // ── SETTINGS TAB ──────────────────────────────────────────────
 function renderSettings(body){
-  const saved=localStorage.getItem('gh_token')||'';
-  body.innerHTML=`<div class="token-box">
-    <label>🔑 GitHub Personal Access Token</label>
-    <input type="password" id="s-token" value="${saved}" placeholder="ghp_xxxxxxxxxxxxxxxx">
+  const savedUrl = localStorage.getItem('sb_url') || '';
+  const savedKey = localStorage.getItem('sb_key') || '';
+  body.innerHTML = `
+  <div class="token-box">
+    <label>🌐 Supabase Project URL</label>
+    <input type="text" id="s-url" value="${esc(savedUrl)}" placeholder="https://xxxxxxxxxxxx.supabase.co">
+  </div>
+  <div class="token-box">
+    <label>🔑 Supabase Anon Key</label>
+    <input type="password" id="s-key" value="${esc(savedKey)}" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…">
     <p class="token-hint">
-      Necessario per salvare le modifiche direttamente su GitHub.<br><br>
-      Come generarlo:<br>
-      1. Vai su <strong>github.com → Settings</strong><br>
-      2. <strong>Developer settings → Personal access tokens → Fine-grained tokens</strong><br>
-      3. Clicca <strong>Generate new token</strong><br>
-      4. Seleziona repository: <em>francobolli</em><br>
-      5. Permessi: <em>Contents → Read and write</em><br>
-      6. Copia il token e incollalo qui
+      Trova questi valori su <strong>supabase.com → Project Settings → API</strong>.<br>
+      La Anon Key è pubblica e sicura da usare nel browser.
     </p>
   </div>
-  <button class="btn-save" style="width:100%" onclick="saveToken()">💾 Salva token</button>
+  <button class="btn-save" style="width:100%;margin-top:.6rem" onclick="saveSupabaseConfig()">💾 Salva configurazione</button>
+  <button class="btn-secondary" onclick="testConnection()">🔌 Testa connessione</button>
+  <hr class="settings-sep">
+  <button class="btn-secondary" onclick="importFromJson()">📦 Importa da stamps.json</button>
+  <p style="font-size:.72rem;color:rgba(245,240,232,.28);font-style:italic;margin-top:.35rem;line-height:1.4;">Importa i francobolli da stamps.json nel database Supabase. Da usare una sola volta durante la migrazione iniziale.</p>
   <div class="adm-status" id="adm-status"></div>
   <hr class="settings-sep">
-  <button class="logout-btn" onclick="logoutAdmin()">🚪 Esci dal pannello admin</button>`;
+  <button class="btn-danger" onclick="logoutAdmin()">🚪 Esci dal pannello admin</button>`;
 }
 
-function saveToken(){
-  const t=document.getElementById('s-token').value.trim();
-  if(!t){showStatus('err','Inserisci un token valido.');return;}
-  localStorage.setItem('gh_token',t); showStatus('ok','✅ Token salvato nel browser.');
+async function saveSupabaseConfig(){
+  const url = document.getElementById('s-url').value.trim();
+  const key = document.getElementById('s-key').value.trim();
+  if (!url || !key){ showStatus('err','Inserisci entrambi i campi.'); return; }
+  localStorage.setItem('sb_url', url);
+  localStorage.setItem('sb_key', key);
+  showStatus('ok','✅ Configurazione salvata. Ricarico…');
+  setTimeout(()=>location.reload(), 1400);
 }
-function logoutAdmin(){adminUnlocked=false;closeAdmin();}
 
-function esc(str){return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+async function testConnection(){
+  const db = getDB();
+  if (!db){ showStatus('err','Inserisci prima URL e Anon Key.'); return; }
+  showStatus('loading','Test connessione in corso…');
+  const { error } = await db.from('stamps').select('id').limit(1);
+  if (error) showStatus('err','❌ Connessione fallita: ' + error.message);
+  else       showStatus('ok','✅ Connessione riuscita!');
+}
+
+async function importFromJson(){
+  const db = getDB();
+  if (!db){ showStatus('err','Configura Supabase prima di importare.'); return; }
+  if (!confirm('Importare tutti i dati da stamps.json nel database Supabase?\n\nUsare solo durante la migrazione iniziale: i francobolli già presenti potrebbero duplicarsi.')) return;
+
+  showStatus('loading','Recupero stamps.json…');
+  let stamps;
+  try {
+    const r = await fetch('stamps.json?_=' + Date.now());
+    stamps = await r.json();
+  } catch(e){ showStatus('err','❌ Impossibile leggere stamps.json'); return; }
+
+  showStatus('loading', `Importazione di ${stamps.length} francobolli…`);
+
+  const mapped = stamps.map(s => ({
+    title:        s.title,
+    subtitle:     s.subtitle   || null,
+    anno:         s.anno       || null,
+    valore:       s.valore     || null,
+    serie:        s.serie      || null,
+    sassone:      s.sassone    || null,
+    dentellatura: s.dentellatura || null,
+    carta:        s.carta      || null,
+    colore:       s.colore     || null,
+    era:          s.categoria === 'regno' ? 'regno' : s.categoria === 'antichi-stati' ? 'antichi-stati' : 'repubblica',
+    posseduto:    true,
+    condizione:   s.condizione || 'fds',
+    priorita:     null,
+    immagine:     s.immagine   || null,
+    note:         s.note       || null,
+  }));
+
+  const { error } = await db.from('stamps').insert(mapped);
+  if (error) showStatus('err','❌ Errore importazione: ' + error.message);
+  else {
+    showStatus('ok', `✅ ${stamps.length} francobolli importati con successo!`);
+    setTimeout(()=>location.reload(), 2000);
+  }
+}
+
+function logoutAdmin(){ adminUnlocked = false; closeAdmin(); }
+
+// ── UTILS ─────────────────────────────────────────────────────
+function esc(str){ return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 async function sha256(str){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
