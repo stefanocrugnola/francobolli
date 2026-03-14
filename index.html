@@ -467,6 +467,8 @@ function render() {
 const ERA_LABEL = { 'antichi-stati':'Antichi Stati', 'regno':"Regno d'Italia", 'repubblica':'Rep. Italiana' };
 const ERA_ICON  = { 'antichi-stati':'⚜️', 'regno':'👑', 'repubblica':'🇮🇹' };
 
+function stampImgError(el) { el.outerHTML = el.dataset.fallback; }
+
 function renderGrid(container, slice) {
   container.className = 'stamp-grid';
   slice.forEach((s, i) => {
@@ -476,9 +478,10 @@ function renderGrid(container, slice) {
     const eraLabel = ERA_LABEL[era] || 'Rep. Italiana';
     const eraIcon  = ERA_ICON[era]  || '🇮🇹';
 
+    const phHtml = `<div class="stamp-placeholder"><div class="ph-flag">${eraIcon}</div><div class="ph-label">${eraLabel}</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
     const img = s.immagine
-      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'stamp-placeholder\\'><div class=\\'ph-flag\\'>${eraIcon}</div><div class=\\'ph-label\\'>${eraLabel}</div><div class=\\'ph-val\\'>${esc(s.valore||'')}</div></div>'">`
-      : `<div class="stamp-placeholder"><div class="ph-flag">${eraIcon}</div><div class="ph-label">${eraLabel}</div><div class="ph-val">${esc(s.valore||'')}</div></div>`;
+      ? `<img class="stamp-img" src="${s.immagine}" alt="${esc(s.title)}" loading="lazy" referrerpolicy="no-referrer" onerror="stampImgError(this)" data-fallback="${phHtml.replace(/"/g,'&quot;')}">`
+      : phHtml;
 
     const c = document.createElement('div');
     c.className = 'stamp-card' + (s.posseduto ? '' : ' mancante');
@@ -509,9 +512,10 @@ function renderTable(container, slice) {
     const gi   = allStamps.indexOf(s);
     const era  = s.era || 'repubblica';
     const icon = ERA_ICON[era] || '🇮🇹';
+    const tdPh = `<div class="td-thumb-ph">${icon}</div>`;
     const thumb = s.immagine
-      ? `<img src="${s.immagine}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\\'td-thumb-ph\\'>${icon}</div>'">`
-      : `<div class="td-thumb-ph">${icon}</div>`;
+      ? `<img src="${s.immagine}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="stampImgError(this)" data-fallback="${tdPh.replace(/"/g,'&quot;')}">`
+      : tdPh;
     const cond = s.posseduto && s.condizione
       ? `<span class="cond-dot cond-${s.condizione}"></span>${condLabel[s.condizione]||s.condizione}`
       : (!s.posseduto ? `<em style="color:var(--sepia);font-size:.8rem;">mancolista</em>` : '');
@@ -584,9 +588,10 @@ function openModal(idx) {
   currentModalIdx = idx; const s = allStamps[idx];
   document.getElementById('m-title').textContent = s.title;
   document.getElementById('m-year').textContent  = `${s.anno||''} · ${s.valore||''}`;
+  const mPh = `<div class="modal-img-ph">${ERA_ICON[s.era]||'🇮🇹'}</div>`;
   document.getElementById('m-img').innerHTML = s.immagine
-    ? `<img src="${s.immagine}" alt="${esc(s.title)}" onerror="this.outerHTML='<div class=\\'modal-img-ph\\'>🇮🇹</div>'">`
-    : `<div class="modal-img-ph">${ERA_ICON[s.era]||'🇮🇹'}</div>`;
+    ? `<img src="${s.immagine}" alt="${esc(s.title)}" referrerpolicy="no-referrer" onerror="stampImgError(this)" data-fallback="${mPh.replace(/"/g,'&quot;')}">`
+    : mPh;
 
   const eraLabel = ERA_LABEL[s.era] || s.era || '—';
   const statoColl = s.posseduto
