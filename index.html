@@ -6,6 +6,7 @@
 <title>Collezione Filatelica — Stefano</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--cream:#f5f0e8;--parchment:#e8dfc8;--ink:#1a1410;--sepia:#6b4c2a;--rust:#9b3a1e;--gold:#c4922a;--gold-light:#d4a840;--faded:#8c7b6a;--shadow-sm:0 2px 8px rgba(26,20,16,.1);--shadow-md:0 6px 24px rgba(26,20,16,.14),0 2px 6px rgba(26,20,16,.07);--shadow-lg:0 14px 44px rgba(26,20,16,.2),0 4px 12px rgba(26,20,16,.1);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -837,6 +838,10 @@ function renderSettings(body){
   <hr class="settings-sep">
   <button class="btn-secondary" onclick="importFromJson()">📦 Importa da stamps.json</button>
   <p style="font-size:.72rem;color:rgba(245,240,232,.28);font-style:italic;margin-top:.35rem;line-height:1.4;">Importa i francobolli da stamps.json nel database Supabase. Da usare una sola volta durante la migrazione iniziale.</p>
+  <hr class="settings-sep">
+  <button class="btn-secondary" onclick="document.getElementById('excel-file-input').click()">📊 Importa da file Excel</button>
+  <input type="file" id="excel-file-input" accept=".xlsx,.xls,.ods" style="display:none" onchange="importFromExcel(event)">
+  <p style="font-size:.72rem;color:rgba(245,240,232,.28);font-style:italic;margin-top:.35rem;line-height:1.4;">Importa i francobolli da un file Excel (.xlsx/.xls). Le colonne vengono riconosciute automaticamente per nome (es. <em>titolo</em>, <em>anno</em>, <em>sassone</em>, <em>serie</em>, <em>valore</em>, <em>era</em>, <em>condizione</em>…).</p>
   <div class="adm-status" id="adm-status"></div>
   <hr class="settings-sep">
   <button class="btn-danger" onclick="logoutAdmin()">🚪 Esci dal pannello admin</button>`;
@@ -897,6 +902,107 @@ async function importFromJson(){
   if (error) showStatus('err','❌ Errore importazione: ' + error.message);
   else {
     showStatus('ok', `✅ ${stamps.length} francobolli importati con successo!`);
+    setTimeout(()=>location.reload(), 2000);
+  }
+}
+
+async function importFromExcel(event){
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  const db = getDB();
+  if (!db){ showStatus('err','Configura Supabase prima di importare.'); return; }
+
+  showStatus('loading','Lettura file Excel…');
+
+  let rows;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb  = XLSX.read(buf, { type: 'array' });
+    const ws  = wb.Sheets[wb.SheetNames[0]];
+    rows = XLSX.utils.sheet_to_json(ws, { defval: null });
+  } catch(e){ showStatus('err','❌ Impossibile leggere il file: ' + e.message); return; }
+
+  if (!rows.length){ showStatus('err','Il file Excel è vuoto.'); return; }
+
+  // Mappa alias colonne → campo schema
+  const colAliases = {
+    title:        ['title','titolo','nome','name','descrizione'],
+    subtitle:     ['subtitle','sottotitolo'],
+    anno:         ['anno','year','anno emissione','anno di emissione'],
+    valore:       ['valore','value','denominazione','facciale'],
+    serie:        ['serie','series','tema','argomento'],
+    sassone:      ['sassone','sassone n.','n. sassone','n.sassone','cat.','catalogo','codice'],
+    dentellatura: ['dentellatura','perf','perforazione','dent.'],
+    carta:        ['carta','paper','tipo carta'],
+    colore:       ['colore','color','colour'],
+    era:          ['era','epoca','periodo','periodo storico'],
+    immagine:     ['immagine','image','foto','img','url'],
+    note:         ['note','notes','commenti','osservazioni'],
+    condizione:   ['condizione','condition','stato','qualità'],
+    posseduto:    ['posseduto','owned','in collezione','ho'],
+    priorita:     ['priorita','priorità','priority'],
+  };
+
+  const rawHeaders = Object.keys(rows[0]);
+  const lowerHeaders = rawHeaders.map(h => h.toLowerCase().trim());
+
+  // Costruisce mappa: header reale → campo schema
+  const fieldMap = {};
+  for (const [field, aliases] of Object.entries(colAliases)){
+    for (const alias of aliases){
+      const idx = lowerHeaders.indexOf(alias.toLowerCase());
+      if (idx !== -1){ fieldMap[rawHeaders[idx]] = field; break; }
+    }
+  }
+
+  const recognizedFields = [...new Set(Object.values(fieldMap))];
+  if (!recognizedFields.includes('title')){
+    showStatus('err', `❌ Colonna "titolo" non trovata. Colonne presenti: ${rawHeaders.join(', ')}`);
+    return;
+  }
+
+  if (!confirm(`Importare ${rows.length} francobolli dal file Excel?\n\nColonne riconosciute: ${recognizedFields.join(', ')}\n\nAttenzione: i francobolli già presenti potrebbero duplicarsi.`)) return;
+
+  showStatus('loading', `Importazione di ${rows.length} francobolli…`);
+
+  const mapped = rows.map(row => {
+    const s = {
+      title: null, subtitle: null, anno: null, valore: null,
+      serie: null, sassone: null, dentellatura: null, carta: null,
+      colore: null, era: 'repubblica', immagine: null, note: null,
+      posseduto: true, condizione: 'fds', priorita: null
+    };
+    for (const [col, field] of Object.entries(fieldMap)){
+      let v = row[col];
+      if (v === null || v === undefined || v === '') continue;
+      if (field === 'anno'){
+        v = parseInt(v) || null;
+      } else if (field === 'posseduto'){
+        const sv = String(v).toLowerCase().trim();
+        v = v === true || v === 1 || sv === 'si' || sv === 'sì' || sv === 'yes' || sv === 'true' || sv === '1';
+      } else if (field === 'era'){
+        v = String(v).toLowerCase().trim();
+        if (!['repubblica','regno','antichi-stati'].includes(v)) v = 'repubblica';
+      } else if (field === 'condizione'){
+        v = String(v).toLowerCase().trim();
+        if (!['fds','spl','bb'].includes(v)) v = 'fds';
+      } else if (field === 'priorita'){
+        v = String(v).toLowerCase().trim();
+        if (!['alta','media','bassa'].includes(v)) v = 'media';
+      } else {
+        v = String(v).trim() || null;
+      }
+      s[field] = v;
+    }
+    return s;
+  }).filter(s => s.title);
+
+  const { error } = await db.from('stamps').insert(mapped);
+  if (error) showStatus('err','❌ Errore importazione: ' + error.message);
+  else {
+    showStatus('ok', `✅ ${mapped.length} francobolli importati con successo!`);
     setTimeout(()=>location.reload(), 2000);
   }
 }
