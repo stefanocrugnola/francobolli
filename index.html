@@ -369,12 +369,21 @@ async function init() {
   }
   document.getElementById('no-config-banner').style.display = 'none';
 
-  const { data, error } = await db.from('stamps')
-    .select('*')
-    .order('anno', { ascending: true });
+  const PAGE = 1000;
+  let allData = [], from = 0, fetchError = null;
+  while (true) {
+    const { data, error } = await db.from('stamps')
+      .select('*')
+      .order('anno', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) { fetchError = error; break; }
+    allData = allData.concat(data || []);
+    if (!data || data.length < PAGE) break;
+    from += PAGE;
+  }
 
-  if (error) { console.error(error); allStamps = []; }
-  else allStamps = data || [];
+  if (fetchError) { console.error(fetchError); allStamps = []; }
+  else allStamps = allData;
 
   buildStats(); buildSelects(); applyFilters();
 }
@@ -898,8 +907,15 @@ async function importFromJson(){
     note:         s.note       || null,
   }));
 
-  const { error } = await db.from('stamps').insert(mapped);
-  if (error) showStatus('err','❌ Errore importazione: ' + error.message);
+  const CHUNK = 500;
+  let importError = null;
+  for (let i = 0; i < mapped.length; i += CHUNK) {
+    const chunk = mapped.slice(i, i + CHUNK);
+    showStatus('loading', `Importazione… ${Math.min(i + CHUNK, mapped.length)}/${mapped.length}`);
+    const { error } = await db.from('stamps').insert(chunk);
+    if (error) { importError = error; break; }
+  }
+  if (importError) showStatus('err','❌ Errore importazione: ' + importError.message);
   else {
     showStatus('ok', `✅ ${stamps.length} francobolli importati con successo!`);
     setTimeout(()=>location.reload(), 2000);
@@ -999,8 +1015,15 @@ async function importFromExcel(event){
     return s;
   }).filter(s => s.title);
 
-  const { error } = await db.from('stamps').insert(mapped);
-  if (error) showStatus('err','❌ Errore importazione: ' + error.message);
+  const CHUNK = 500;
+  let importError = null;
+  for (let i = 0; i < mapped.length; i += CHUNK) {
+    const chunk = mapped.slice(i, i + CHUNK);
+    showStatus('loading', `Importazione… ${Math.min(i + CHUNK, mapped.length)}/${mapped.length}`);
+    const { error } = await db.from('stamps').insert(chunk);
+    if (error) { importError = error; break; }
+  }
+  if (importError) showStatus('err','❌ Errore importazione: ' + importError.message);
   else {
     showStatus('ok', `✅ ${mapped.length} francobolli importati con successo!`);
     setTimeout(()=>location.reload(), 2000);
